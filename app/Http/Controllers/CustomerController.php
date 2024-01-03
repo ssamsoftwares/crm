@@ -48,7 +48,6 @@ class CustomerController extends Controller
         return view('superadmin.customer.all', compact('customers', 'users'));
     }
 
-
     public function bulkUploadCustomerView(Request $request, $customerId)
     {
         $customer = Customer::with('comments', 'user')->find($customerId);
@@ -66,6 +65,18 @@ class CustomerController extends Controller
         DB::beginTransaction();
         try {
             $data = $request->all();
+            // Customer PHOTO
+            if ($request->hasFile('image')) {
+                // Delete the old image if it exists
+                if (is_file(public_path($customer->image))) {
+                    unlink(public_path($customer->image));
+                }
+                $customerImg = $request->file('image');
+                $filename = uniqid() . '.' . $customerImg->getClientOriginalExtension();
+                $customerImg->move(public_path('customer_img'), $filename);
+                $data['image'] = 'customer_img/' . $filename;
+            }
+
             $customer->update($data);
         } catch (Exception $e) {
             DB::rollBack();

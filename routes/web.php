@@ -78,7 +78,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('customers-edit-comment/{comment}',[UsersCustomerController::class,'editComment'])->name('user.editComment');
     Route::post('customers-update-comment/{comment?}',[UsersCustomerController::class,'updateComments'])->name('user.updateComments');
 
-
 });
 
 
