@@ -1,0 +1,87 @@
+@media print {
+
+    @page { 
+        size: auto;  
+        margin: 0mm; 
+        margin-top:20px
+    }
+
+
+    .card {
+        padding:10px !important;
+        border: 1px solid #000 !important;
+    }
+
+    .card-header {
+        /* color:red !important; */
+        background-color: #c4c4c4 !important;
+        border-bottom: 1px solid #c4c4c4 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-top: 10px !important;
+        margin-bottom: .825rem !important;
+    }
+
+    .card-title {
+        margin-bottom: 0 !important;
+        display: flex;
+    }
+
+    .card-title span {
+        flex: 1 1;
+    }
+
+    hr {
+        margin:5px !important;
+    }
+
+    .investment-details {
+        display: none !important;
+    }
+
+    .page-title-box,
+    .page-title-box h4 {
+        display: block !important;
+    }
+
+
+    /* upcoming transactions */
+
+    .btn,
+    .actions .btn i {
+        display: none !important;
+    }
+
+    .actions .btn {
+        padding:0 !important;
+    }
+
+    .row .col-md-6 {
+        max-width: 50% !important;
+    }
+    #page-topbar {
+        position:initial !important;
+    }
+    #page-topbar .navbar-header .logo .logo-sm {
+        display: none !important;
+    }
+
+    #page-topbar .navbar-header .navbar-brand-box {
+        padding:0 !important;
+    }
+
+
+    #page-topbar .navbar-header, 
+    #page-topbar .navbar-header .navbar-brand-box,
+    .navbar-brand-box .logo .logo-lg {
+        display: block !important;
+        width:100px !important;
+        height: 100px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    #page-topbar .navbar-header .navbar-brand-box .logo .logo-lg img {
+        width: 100px;
+        height: 100px;
+    }
+}
