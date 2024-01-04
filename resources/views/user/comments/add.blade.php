@@ -15,7 +15,6 @@
         <a href="{{ url()->previous() }}" class="btn btn-warning btn-sm">
             <i class="fa fa-backward"></i> Back
         </a>
-
     </div>
 
     <div class="row">
@@ -45,7 +44,7 @@
         </div>
     </div>
 
-    <div class="row">
+    {{-- <div class="row">
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header  m-0">
@@ -57,8 +56,6 @@
                     <div class="row shadow-lg p-1 mb-2 bg-white rounded">
                         <div class="col-8">
                             <h5 class="card-title">
-                                {{-- <img src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-avatar-icon-profile-icon-member-login-vector-isolated-png-image_5247852.jpg"
-                                    alt="..." class="rounded-circle" width="40"> --}}
                                 <i>{{$comment->customer->name}}</i>
                             </h5>
                         </div>
@@ -79,7 +76,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
 @endsection
 

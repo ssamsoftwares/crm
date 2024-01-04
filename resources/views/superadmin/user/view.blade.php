@@ -11,7 +11,9 @@
 @endpush
 
 @section('content')
-
+<a href="{{ url()->previous() }}" class="btn btn-warning btn-sm m-1">
+    <i class="fa fa-backward"></i> Back
+</a>
     {{-- User details --}}
     <div class="row">
         <div class="col-lg-6">

@@ -52,8 +52,41 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="row m-1 mt-4 justify-content-end d-flex">
 
+                <form action="{{ route('customers') }}" method="get">
+                    <div class="row m-2">
+                        <div class="col-3">
+                            <x-form.select label="Status" chooseFileComment="All" name="customer_status" id="customer_status"
+                                :options="[
+                                    'today' => 'Today',
+                                    'high' => 'High',
+                                    'medium' => 'Medium',
+                                    'low' => 'Low',
+                                ]" :selected="isset($_REQUEST['customer_status']) ? $_REQUEST['customer_status'] : ''" />
+                        </div>
+
+                        <div class="col-3">
+                            <x-form.select label="Follow Up" chooseFileComment="All" name="follow_up" id="follow_up"
+                                :options="[
+                                    'npc' => 'NPC',
+                                    'oon' => 'OON',
+                                ]" :selected="isset($_REQUEST['follow_up']) ? $_REQUEST['follow_up'] : ''" />
+                        </div>
+
+                        <div class="col-4">
+                            <x-form.input name="search" label="Search" type="text" placeholder="Search....."
+                                value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" />
+                        </div>
+
+                        <div class="col-2">
+                            <input type="submit" class="btn btn-primary mt-lg-4" value="Filter">
+                        </div>
+
+                    </div>
+                </form>
+
+
+                <div class="row m-1 mt-1 justify-content-end d-flex">
                     <div class="col-md-8">
                         <form action="{{ route('assignCustomer') }}" method="post" id="assignCustomerForm">
                             @csrf
@@ -78,82 +111,93 @@
                     </div>
 
                     <div class="col-md-4">
-                        <div class="col-lg-12">
-                            <x-search.table-search action="{{ route('customers') }}" method="get" name="search"
-                                value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" btnClass="search_btn" />
-                        </div>
                     </div>
                 </div>
 
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
-                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <input type="checkbox" class="form-check-input" id="selectAll">
-                                </th>
-                                <th>{{'#'}}</th>
-                                <th>{{'Allot User'}}</th>
-                                <th>{{ 'Customer Photo' }}</th>
-                                <th>{{ 'Name' }}</th>
-                                <th>{{ 'Email' }}</th>
-                                <th>{{ 'Phone' }}</th>
-                                <th>{{ 'Company Name' }}</th>
-                                {{-- <th>{{ 'Comment' }}</th> --}}
-                                <th>{{ 'Actions' }}</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @php
-                                $i = 1;
-                            @endphp
-                            @foreach ($customers as $cust)
+                            style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <input type="checkbox" class="form-check-input" name="selected_customers[]"
-                                            value="{{ $cust->id }}"
-                                            @if ($cust->user_id != null) checked disabled @endif>
-                                    </td>
-                                    <td>{{$i++}}</td>
-
-                                        <td class="text-danger">{{isset($cust->user->name) ? $cust->user->name : 'Not Allot'}}</td>
-
-
-                                    <td>
-                                        @if (!empty($stu->image))
-                                            <img src="{{ asset($stu->image) }}" alt="studentImg" width="85">
-                                        @else
-                                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ799fyQRixe5xOmxYZc3kAy6wgXGO-GHpHSA&usqp=CAU"
-                                                alt="" width="85">
-                                        @endif
-                                    </td>
-                                    <td>{{ $cust->name }}</td>
-                                    <td>{{ $cust->email }}</td>
-                                    <td>{{ $cust->phone_number }}</td>
-                                    <td>{{ $cust->company_name }}</td>
-                                    {{-- <td>
-                                        <a href="" class="btn btn-secondary btn-sm">Comment</a>
-                                    </td> --}}
-                                    <td>
-                                        <div class="action-btns text-center" role="group">
-                                            <a href="{{ route('customer.bulkUploadCustomerView',$cust->id) }}"
-                                                class="btn btn-primary waves-effect waves-light view">
-                                                <i class="ri-eye-line"></i>
-                                            </a>
-
-                                            <a href="{{ route('customer.bulkUploadCustomerEdit', ['customer' => $cust->id]) }}"
-                                                class="btn btn-info waves-effect waves-light edit">
-                                                <i class="ri-pencil-line"></i>
-                                            </a>
-                                        </div>
-                                    </td>
+                                    <th>
+                                        <input type="checkbox" class="form-check-input" id="selectAll">
+                                    </th>
+                                    <th>{{ '#' }}</th>
+                                    <th>{{ 'Allot User' }}</th>
+                                    <th>{{ 'Name' }}</th>
+                                    <th>{{ 'Email' }}</th>
+                                    <th>{{ 'Phone' }}</th>
+                                    <th>{{ 'Follow Up' }}</th>
+                                    <th>{{ 'Status' }}</th>
+                                    <th>{{ 'Actions' }}</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+
+                            <tbody>
+                                @php
+                                    $i = 1;
+                                @endphp
+                                @foreach ($customers as $cust)
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input" name="selected_customers[]"
+                                                value="{{ $cust->id }}"
+                                                @if ($cust->user_id != null) checked disabled @endif>
+                                        </td>
+                                        <td>{{ $i++ }}</td>
+
+                                        <td class="text-danger">
+                                            {{ isset($cust->user->name) ? $cust->user->name : 'Not Allot' }}</td>
+
+                                        <td>{{ $cust->name }}</td>
+                                        <td>{{ $cust->email }}</td>
+                                        <td>{{ $cust->phone_number }}</td>
+
+                                        <td>
+                                            <select class="form-select follow-up-status"
+                                                data-customer-id="{{ $cust->id }}">
+                                                <option value="npc" {{ $cust->follow_up == 'npc' ? 'selected' : '' }}>
+                                                    NPC</option>
+                                                <option value="oon" {{ $cust->follow_up == 'oon' ? 'selected' : '' }}>
+                                                    OON</option>
+                                            </select>
+                                        </td>
+
+                                        <td>
+                                            <select class="form-select customer-status"
+                                                data-customerStatus-id="{{ $cust->id }}">
+                                                <option value="today" {{ $cust->status == 'today' ? 'selected' : '' }}>
+                                                    Today</option>
+                                                <option value="high" {{ $cust->status == 'high' ? 'selected' : '' }}>
+                                                    High</option>
+
+                                                <option value="medium" {{ $cust->status == 'medium' ? 'selected' : '' }}>
+                                                    Medium</option>
+
+                                                <option value="low" {{ $cust->status == 'low' ? 'selected' : '' }}>
+                                                    Low</option>
+                                            </select>
+                                        </td>
+
+
+                                        <td>
+                                            <div class="action-btns text-center" role="group">
+                                                <a href="{{ route('customer.bulkUploadCustomerView', $cust->id) }}"
+                                                    class="btn btn-primary waves-effect waves-light view">
+                                                    <i class="ri-eye-line"></i>
+                                                </a>
+
+                                                <a href="{{ route('customer.bulkUploadCustomerEdit', ['customer' => $cust->id]) }}"
+                                                    class="btn btn-info waves-effect waves-light edit">
+                                                    <i class="ri-pencil-line"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
 
                     {{ $customers->appends(request()->query())->links() }}
@@ -189,8 +233,47 @@
                 $('#assignCustomerForm').submit();
             });
             $('#selectAll').on('change', function() {
-                $('input[name="selected_customers[]"]:not(:disabled)').prop('checked', $(this).prop('checked'));
+                $('input[name="selected_customers[]"]:not(:disabled)').prop('checked', $(this).prop(
+                    'checked'));
             });
         });
     </script>
+{{-- STATUS & Follow Status UPDATE --}}
+    <script>
+        $(document).ready(function() {
+            function updateStatus(url, idKey, statusKey, statusType) {
+                return function() {
+                    var itemId = $(this).data(idKey);
+                    var selectedStatus = $(this).val();
+                    $.ajax({
+                        type: 'PATCH',
+                        url: url + '/' + itemId,
+                        data: {
+                            [statusKey]: selectedStatus,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            if (response.status) {
+                                console.log(statusType + ' updated successfully');
+                            } else {
+                                console.error('Failed to update ' + statusType + ':', response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Ajax request failed:', error);
+                        }
+                    });
+                };
+            }
+
+            // Follow-up status change
+            $('.follow-up-status').change(updateStatus('/update-follow-up-status', 'customer-id', 'follow_up_status', 'Follow-up Status'));
+
+            // Customer status change
+            $('.customer-status').change(updateStatus('/update-customer-status', 'customerstatus-id', 'customer_status', 'Customer Status'));
+        });
+    </script>
+
+
+
 @endpush

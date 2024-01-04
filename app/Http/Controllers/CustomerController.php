@@ -26,8 +26,11 @@ class CustomerController extends Controller
     public function bulkUploadCustomer(Request $request)
     {
         $customers = Customer::with('user');
+        $search = $request->search;
+        $status = $request->customer_status;
+        $follow_up = $request->follow_up;
+
         if (!empty($request->search)) {
-            $search = $request->search;
             $customers->where(function ($subquery) use ($search) {
                 $subquery->where('name', 'like', '%' . $search . '%')
                     ->orWhereHas('user', function ($userQuery) use ($search) {
@@ -35,18 +38,56 @@ class CustomerController extends Controller
                     })
                     ->orWhere('email', 'like', '%' . $search . '%')
                     ->orWhere('phone_number', 'like', '%' . $search . '%')
+                    ->orWhere('status', 'like', '%' . $search . '%')
+                    ->orWhere('follow_up', 'like', '%' . $search . '%')
                     ->orWhere('company_name', 'like', '%' . $search . '%');
             });
         }
 
-        $customers = $customers->paginate(10);
+        if (!empty($request->customer_status)) {
+            $customers->where('status', $status);
+        }
 
+        if (!empty($request->follow_up)) {
+            $customers->where('follow_up', $follow_up);
+        }
+        $customers = $customers->paginate(10);
         $users = User::where(['status' => 'active',])->whereHas('roles', function ($query) {
             $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
         })->get();
 
         return view('superadmin.customer.all', compact('customers', 'users'));
     }
+
+
+    public function create()
+    {
+        return view('superadmin.customer.add');
+    }
+
+    public function store(Request $request)
+    {
+        $this->validate($request, [
+            'name' => 'required',
+            'email' => 'required|email|unique:customers,email',
+            'phone_number' => 'required',
+            'company_name' => 'required',
+            'customer_status' => 'required'
+        ]);
+        DB::beginTransaction();
+        try {
+            $data = $request->all();
+            $data['status'] = $request->customer_status;
+            Customer::create($data);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('status', $e->getMessage());
+        }
+        DB::commit();
+        return redirect()->back()->with('status', 'Customer Added Successfully !');
+    }
+
+
 
     public function bulkUploadCustomerView(Request $request, $customerId)
     {
@@ -62,21 +103,16 @@ class CustomerController extends Controller
 
     public function bulkUploadCustomerUpdate(Request $request, Customer $customer)
     {
+        $this->validate($request, [
+            'name' => 'required',
+            'email' => 'required',
+            'phone_number' => 'required',
+            'company_name' => 'required',
+        ]);
         DB::beginTransaction();
         try {
             $data = $request->all();
-            // Customer PHOTO
-            if ($request->hasFile('image')) {
-                // Delete the old image if it exists
-                if (is_file(public_path($customer->image))) {
-                    unlink(public_path($customer->image));
-                }
-                $customerImg = $request->file('image');
-                $filename = uniqid() . '.' . $customerImg->getClientOriginalExtension();
-                $customerImg->move(public_path('customer_img'), $filename);
-                $data['image'] = 'customer_img/' . $filename;
-            }
-
+            $data['status'] = $request->customer_status;
             $customer->update($data);
         } catch (Exception $e) {
             DB::rollBack();

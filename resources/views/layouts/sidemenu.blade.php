@@ -63,6 +63,7 @@
                             </a>
 
                             <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('customer.create') }}">Add Customer</a></li>
                                 <li><a href="{{ route('customers') }}">View All</a></li>
                                 <li><a href="{{ route('customer.importFileView') }}">Upload Customers</a></li>
                             </ul>

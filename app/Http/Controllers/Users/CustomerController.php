@@ -17,9 +17,13 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
+        $search = $request->search;
+        $status = $request->customer_status;
+        $follow_up = $request->follow_up;
         $authUser = Auth::user();
         $customersQuery = Customer::where('user_id', $authUser->id);
-        $search = $request->search;
+
+
         if (!empty($search)) {
             $customersQuery->where(function ($subquery) use ($search) {
                 $subquery->where('name', 'like', '%' . $search . '%')
@@ -28,6 +32,15 @@ class CustomerController extends Controller
                     ->orWhere('company_name', 'like', '%' . $search . '%');
             });
         }
+
+        if (!empty($request->customer_status)) {
+            $customersQuery->where('status', $status);
+        }
+
+        if (!empty($request->follow_up)) {
+            $customersQuery->where('follow_up', $follow_up);
+        }
+
         $customers = $customersQuery->orderBy('id', 'desc')->paginate(15);
 
         return view('user.customers', compact('customers'));
@@ -62,23 +75,6 @@ class CustomerController extends Controller
         return redirect()->back()->with('status', "Comment Add Successfully Done!");
     }
 
-    // public function viewAllComments(Request $request, $customerId)
-    // {
-    //     $customer = Customer::with(['comments' => function ($query) {
-    //         $query->orderBy('id', 'desc');
-    //     }])
-    //         ->where('user_id', auth()->user()->id)
-    //         ->where('id', $customerId);
-    //     // ->first();
-    //     $search = $request->search;
-    //     if (!empty($search)) {
-
-    //     }
-    //     $customer->first();
-    //     $comments = $customer->comments()->paginate(15);
-    //     return view('user.comments.viewAll_comment', compact('customer', 'comments'));
-    // }
-
     public function viewAllComments(Request $request, $customerId)
     {
         $customer = Customer::with(['comments' => function ($query) use ($request) {
@@ -95,9 +91,9 @@ class CustomerController extends Controller
                 }
             }
         }])
-        ->where('user_id', auth()->user()->id)
-        ->where('id', $customerId)
-        ->first();
+            ->where('user_id', auth()->user()->id)
+            ->where('id', $customerId)
+            ->first();
 
         if (!$customer) {
             abort(404); // Handle the case when customer is not found
@@ -108,16 +104,14 @@ class CustomerController extends Controller
         return view('user.comments.viewAll_comment', compact('customer', 'comments'));
     }
 
-
-
-
     public function editComment(Comment $comment)
     {
         $comment = Comment::with('customer', 'customer.user')
             ->where('user_id', auth()->user()->id)
             ->where('id', $comment->id)
             ->first();
-        return view('user.comments.edit', compact('comment'));
+            return response()->json(['status'=>200,'data'=>$comment]);
+
     }
 
     public function updateComments(Request $request)
@@ -135,5 +129,35 @@ class CustomerController extends Controller
         }
         DB::commit();
         return redirect()->back()->with('status', "Comment Updated Successfully Done!");
+    }
+
+
+    public function updateFollowUpStatus(Request $request, $id)
+    {
+        $customer = Customer::find($id);
+
+        if ($customer) {
+            $customer->follow_up  = $request->input('follow_up_status');
+            $customer->save();
+
+            return response()->json(['status' => true]);
+        }
+
+        return response()->json(['status' => false, 'message' => 'Customer not found']);
+    }
+
+
+    public function updateCustomerStatus(Request $request, $id)
+    {
+        $customer = Customer::find($id);
+
+        if ($customer) {
+            $customer->status  = $request->input('customer_status');
+            $customer->save();
+
+            return response()->json(['status' => true]);
+        }
+
+        return response()->json(['status' => false, 'message' => 'Customer not found']);
     }
 }

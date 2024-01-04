@@ -16,9 +16,59 @@ class DashboardController extends Controller
 
     public function __invoke(Request $request)
     {
-        $total['users'] = User::count();
-        $total['customers'] = Customer::count();
-        $total['allotCustomerUser'] = Customer::where('user_id',auth()->user()->id)->count();
+        $authUser = Auth::user();
+        $search = $request->search;
+        $total = [
+            'users' => User::whereNotIn('id', [$authUser->id])
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->where('name', 'superadmin');
+                })
+                ->count(),
+            'customers' => Customer::count(),
+            'allotCustomerUser' => Customer::where('user_id', auth()->user()->id)->count(),
+        ];
+
+        $customerQuery = Customer::where('status', 'today');
+
+        if ($authUser->hasRole('superadmin')) {
+            if (!empty($search)) {
+                $total['customerTodayStatus'] = $customerQuery
+                    ->where(function ($subquery) use ($search) {
+                        $subquery->where('name', 'like', '%' . $search . '%')
+                            ->orWhereHas('user', function ($userQuery) use ($search) {
+                                $userQuery->where('name', 'like', '%' . $search . '%');
+                            })
+                            ->orWhere('email', 'like', '%' . $search . '%')
+                            ->orWhere('phone_number', 'like', '%' . $search . '%')
+                            ->orWhere('status', 'like', '%' . $search . '%')
+                            ->orWhere('follow_up', 'like', '%' . $search . '%')
+                            ->orWhere('company_name', 'like', '%' . $search . '%');
+                    })
+                    ->paginate(1);
+            } else {
+                $total['customerTodayStatus'] = $customerQuery->paginate(10);
+            }
+        } elseif ($authUser->hasRole('user')) {
+            if (!empty($search)) {
+                $total['customerTodayStatus'] = $customerQuery
+                    ->where('user_id', $authUser->id)
+                    ->where(function ($subquery) use ($search) {
+                        $subquery->where('name', 'like', '%' . $search . '%')
+                            ->orWhereHas('user', function ($userQuery) use ($search) {
+                                $userQuery->where('name', 'like', '%' . $search . '%');
+                            })
+                            ->orWhere('email', 'like', '%' . $search . '%')
+                            ->orWhere('phone_number', 'like', '%' . $search . '%')
+                            ->orWhere('status', 'like', '%' . $search . '%')
+                            ->orWhere('follow_up', 'like', '%' . $search . '%')
+                            ->orWhere('company_name', 'like', '%' . $search . '%');
+                    })
+                    ->paginate(1);
+            } else {
+                $total['customerTodayStatus'] = $customerQuery->where('user_id', $authUser->id)->paginate(10);
+            }
+        }
+
         return view('dashboard')->with(compact('total'));
     }
 }

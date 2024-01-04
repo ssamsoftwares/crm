@@ -27,6 +27,9 @@ class CustomerImport  implements ToModel, WithHeadingRow
             'email' => isset($row['email']) ? trim($row['email']) : null,
             'phone_number' => isset($row['phone_number']) ? trim($row['phone_number']) : null,
             'company_name' => isset($row['company_name']) ? trim($row['company_name']) : null,
+            'status' => isset($row['status']) ? strtolower(trim($row['status'])) : null,
+            'follow_up' => isset($row['follow_up']) ? strtolower(trim($row['follow_up'])) : null,
+
         ];
 
         $existingCustomerByEmail = Customer::where('email', trim($row['email']))->first();

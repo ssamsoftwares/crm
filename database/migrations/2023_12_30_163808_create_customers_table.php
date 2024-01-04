@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone_number');
             $table->string('company_name');
-            $table->string('image')->nullable();
+            $table->string('status')->nullable();
+            $table->string('follow_up')->nullable();
             $table->timestamps();
-
             $table->foreign('user_id')
                 ->references('id')->on('users')
                 ->onDelete('cascade');

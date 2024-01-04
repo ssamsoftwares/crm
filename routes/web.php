@@ -58,15 +58,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // customers Routes
     Route::get('/customers', [CustomerController::class, 'bulkUploadCustomer'])->name('customers');
     Route::post('assign-customer-to-user', [CustomerController::class, "assignCustomer"])->name('assignCustomer');
-
     Route::get('/customer-view/{customerId?}', [CustomerController::class, 'bulkUploadCustomerView'])->name('customer.bulkUploadCustomerView');
+    Route::get('/customer-add', [CustomerController::class, 'create'])->name('customer.create');
+    Route::post('/customer-add', [CustomerController::class, 'store'])->name('customer.store');
     Route::get('/import-customer', [CustomerController::class, 'importFileView'])->name('customer.importFileView');
 
     Route::post('/import-customer', [CustomerController::class, 'customerImport'])->name('customer.import');
-
     Route::get('/download-customers-csv-file', [CustomerController::class, 'downloadCustomerSampleCsv'])->name('customer.downloadSampleCsv');
     Route::get('/customer-edit/{customer?}', [CustomerController::class, 'bulkUploadCustomerEdit'])->name('customer.bulkUploadCustomerEdit');
     Route::post('/customer-edit/{customer?}', [CustomerController::class, 'bulkUploadCustomerUpdate'])->name('customer.bulkUploadCustomerUpdate');
+
 
     // User Comments Routes
     Route::get('customers-list',[UsersCustomerController::class,'index'])->name('user.customersList');
@@ -77,6 +78,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('customers-edit-comment/{comment}',[UsersCustomerController::class,'editComment'])->name('user.editComment');
     Route::post('customers-update-comment/{comment?}',[UsersCustomerController::class,'updateComments'])->name('user.updateComments');
+
+
+    Route::patch('/update-follow-up-status/{id}',[UsersCustomerController::class,'updateFollowUpStatus'])->name('user.updateFollowUpStatus');
+
+    Route::patch('/update-customer-status/{id}',[UsersCustomerController::class,'updateCustomerStatus'])->name('user.updateCustomerStatus');
 
 });
 

@@ -20,16 +20,6 @@
             <div class="card border border-secondary rounded">
                 <h5 class="card-header">{{ 'Customer Profile' }}</h5>
                 <div class="card-body">
-                    <div class="profile text-lg-center">
-                        <strong class="float-end">Created at :
-                            {{ \Carbon\Carbon::parse($customer->created_at)->format('d-M-Y') }}</strong>
-                            @if (!empty($customer->image))
-                            <img src="{{asset($customer->image)}}" alt="" width="90">
-                            @else
-                            <img src="https://cdn-icons-png.flaticon.com/128/3899/3899618.png" alt="" width="90">
-                            @endif
-
-                    </div>
                     <div class="row mt-lg-4">
                         <div class="col-4">
                             <b>Customer Name :</b>
@@ -56,7 +46,27 @@
                         <div class="col-4">
                             <strong>Allot User Name :</strong>
                             <span>
-                                {{ isset($customer->user->name) ? $customer->user->name : 'Not alloted'}}
+                                {{ isset($customer->user->name) ? $customer->user->name : 'Not alloted' }}
+                            </span>
+                        </div>
+
+                        <div class="col-4">
+                            <strong>Status :</strong>
+                            @if ($customer->status == 'today')
+                                <span class="btn btn-primary btn-sm">{{ 'Today' }}</span>
+                            @elseif ($customer->status == 'high')
+                                <span class="btn btn-success btn-sm">{{ 'High' }}</span>
+                            @elseif ($customer->status == 'medium')
+                                <span class="btn btn-warning btn-sm">{{ 'Medium' }}</span>
+                            @else
+                                <span class="btn btn-danger btn-sm">{{ 'Low' }}</span>
+                            @endif
+                        </div>
+
+                        <div class="col-4">
+                            <strong>Follow Up :</strong>
+                            <span>
+                                {{ isset($customer->follow_up) ? Str::upper($customer->follow_up) : 'No Follow Up'}}
                             </span>
                         </div>
 

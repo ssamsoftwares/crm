@@ -5,7 +5,7 @@
 @endpush
 
 @push('heading')
-    {{ 'All Comments -' }} {{$customer->name}}
+    {{ 'All Comments -' }} {{ $customer->name }}
 @endpush
 
 @section('content')
@@ -52,7 +52,7 @@
     <a href="{{ url()->previous() }}" class="btn btn-warning btn-sm m-1">
         <i class="fa fa-backward"></i> Back
     </a>
-    <a href="{{route('user.customersList')}}" class="btn btn-info btn-sm m-1">
+    <a href="{{ route('user.customersList') }}" class="btn btn-info btn-sm m-1">
         Customers
     </a>
     <div class="row">
@@ -66,7 +66,8 @@
 
                     <div class="col-md-4">
                         <div class="col-lg-12">
-                            <x-search.table-search action="{{ route('user.viewAllComments',$customer->id) }}" method="get" name="search"
+                            <x-search.table-search action="{{ route('user.viewAllComments', $customer->id) }}"
+                                method="get" name="search"
                                 value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" btnClass="search_btn" />
                         </div>
                     </div>
@@ -86,7 +87,7 @@
 
                         <tbody>
                             @php
-                                $i =1; @endphp
+                            $i = 1; @endphp
                             @foreach ($customer->comments as $com)
                                 <tr>
                                     <td>{{ $i++ }}</td>
@@ -94,7 +95,9 @@
                                     {{-- <td>{{ $com->created_at->format('d-M-Y H:i:s') }}</td> --}}
                                     <td>{{ $com->created_at->format('d-M-Y') }}</td>
                                     <td>
-                                        <a href="{{route('user.editComment',$com->id)}}" class="btn btn-info btn-sm">Edit</a>
+                                        {{-- {{ route('user.editComment', $com->id) }} --}}
+                                        <a href="javascript:void(0)" class="btn btn-info btn-sm"
+                                            onclick="editComment(<?= $com->id ?>)">Edit</a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -105,8 +108,53 @@
             </div>
         </div> <!-- end col -->
     </div> <!-- end row -->
+
+    <div class="modal fade" id="commentEditModel" tabindex="-1" aria-labelledby="commentEditModelLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('user.updateComments') }}" method="post">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="commentEditModelLabel">{{ 'Customer Details' }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        @csrf
+                        <input type="hidden" name="id" value="">
+                        <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+                        <input type="hidden" name="customer_id" value="">
+                        <label for="">Comments <span class="text-danger">*</span></label>
+                        <textarea id="elm1" name="comments"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="submit" class="btn btn-primary">Update Comment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('script')
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.7.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
+    <script>
+        function editComment(comment_id) {
+            let url = `{{ url('customers-edit-comment/${comment_id}') }}`
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function(res) {
+                    let model = $('#commentEditModel')
+                    tinyMCE.get('elm1').setContent(res.data.comments)
+                    $('input[name="id"]').val(res.data.id);
+                    $('input[name="customer_id"]').val(res.data.customer_id);
+                    model.modal("show")
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+    </script>
 @endpush

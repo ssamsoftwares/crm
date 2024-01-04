@@ -11,7 +11,9 @@
 @section('content')
 
 <x-status-message/>
-
+<a href="{{ url()->previous() }}" class="btn btn-warning btn-sm m-1">
+    <i class="fa fa-backward"></i> Back
+</a>
 <div class="row">
     <div class="col-lg-12">
         <div class="card">
