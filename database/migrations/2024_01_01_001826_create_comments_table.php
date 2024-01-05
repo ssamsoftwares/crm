@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('customer_id');
             $table->longText('comments');
+            $table->string('fast_follow_up')->nullable();
             $table->timestamps();
         });
     }

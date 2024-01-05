@@ -62,7 +62,10 @@ class CustomerController extends Controller
 
     public function create()
     {
-        return view('superadmin.customer.add');
+        $users = User::where(['status' => 'active',])->whereHas('roles', function ($query) {
+            $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
+        })->get();
+        return view('superadmin.customer.add', compact('users'));
     }
 
     public function store(Request $request)
@@ -74,10 +77,16 @@ class CustomerController extends Controller
             'company_name' => 'required',
             'customer_status' => 'required'
         ]);
+
         DB::beginTransaction();
         try {
             $data = $request->all();
             $data['status'] = $request->customer_status;
+
+            if(isset($request->user_id)){
+                $data['alloted_date'] = Carbon::now();
+            }
+
             Customer::create($data);
         } catch (Exception $e) {
             DB::rollBack();
@@ -98,7 +107,10 @@ class CustomerController extends Controller
 
     public function bulkUploadCustomerEdit(Customer $customer)
     {
-        return view('superadmin.customer.edit', compact('customer'));
+        $users = User::where(['status' => 'active',])->whereHas('roles', function ($query) {
+            $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
+        })->get();
+        return view('superadmin.customer.edit', compact('customer','users'));
     }
 
     public function bulkUploadCustomerUpdate(Request $request, Customer $customer)
@@ -112,6 +124,10 @@ class CustomerController extends Controller
         DB::beginTransaction();
         try {
             $data = $request->all();
+            $allotedUser = Customer::where('user_id',$request->user_id)->first();
+            if(!$allotedUser){
+                $data['alloted_date'] = Carbon::now();
+            }
             $data['status'] = $request->customer_status;
             $customer->update($data);
         } catch (Exception $e) {

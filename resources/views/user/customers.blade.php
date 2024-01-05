@@ -1,11 +1,11 @@
 @extends('layouts.main')
 
 @push('page-title')
-    <title>All Customer</title>
+    <title> List of Alloted All Customer</title>
 @endpush
 
 @push('heading')
-    {{ 'All Customer' }}
+    {{ 'List of Alloted All Customer' }}
 @endpush
 
 @section('content')
@@ -98,6 +98,7 @@
                                 <th>{{ 'Follow Up' }}</th>
                                 <th>{{ 'Status' }}</th>
                                 <th>{{ 'Comments' }}</th>
+                                <th>{{ 'Action' }}</th>
                             </tr>
                         </thead>
 
@@ -141,6 +142,10 @@
                                             <a href="{{route('user.addComments',$cust->id)}}" class="btn btn-primary btn-sm">Add</a>
                                             <a href="{{route('user.viewAllComments',$cust->id)}}" class="btn btn-info btn-sm">View/Edit</a>
                                         </div>
+                                    </td>
+
+                                    <td>
+                                        <a href="{{ route('customer.bulkUploadCustomerView', $cust->id) }}" class="btn btn-warning btn-sm">{{'Customer Profile'}}</a>
                                     </td>
                                 </tr>
                             @endforeach

@@ -44,40 +44,6 @@
         </div>
     </div>
 
-    {{-- <div class="row">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header  m-0">
-                   <b class="text-danger"> {{ 'Letest 5 Comment' }}</b>
-                    <a href="{{route('user.viewAllComments',$customer->id)}}" class="float-end btn btn-info btn-sm">View All Comments</a>
-                </div>
-                <div class="card-body">
-                    @foreach ($customer->comments as $comment)
-                    <div class="row shadow-lg p-1 mb-2 bg-white rounded">
-                        <div class="col-8">
-                            <h5 class="card-title">
-                                <i>{{$comment->customer->name}}</i>
-                            </h5>
-                        </div>
-                        <div class="col-4 float-end text-center">
-                            <span>{{ $comment->customer->created_at->format('F j, Y \a\t g:i a') }}</span>
-                        </div>
-                        <hr>
-                        <div class="col-11">
-                            <p>{!! $comment->comments  !!}
-
-                            </p>
-                        </div>
-                        <div class="col-1 float-end">
-                            <a href="{{route('user.editComment',$comment->id )}}" class="btn btn-info btn-hover-danger btn-sm">Edit</a>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div> --}}
-
 @endsection
 
 @push('script')

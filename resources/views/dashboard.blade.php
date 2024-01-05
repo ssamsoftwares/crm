@@ -48,8 +48,7 @@
                                 <th>{{ 'Phone' }}</th>
                                 <th>{{ 'Follow Up' }}</th>
                                 <th>{{ 'Status' }}</th>
-                                @role('superadmin')
-                                <th>{{ 'Actions' }}</th>@endrole
+                                <th>{{ 'Actions' }}</th>
                             </tr>
                         </thead>
 
@@ -62,22 +61,35 @@
                                 <tr>
                                     <td>{{ $i++ }}</td>
                                     @if (auth()->user()->hasRole('superadmin'))
-                                    <td>{{ isset($custStatus->user->name)?$custStatus->user->name: 'Not Allot User' }}</td>
-                                @endif
+                                        <td>{{ isset($custStatus->user->name) ? $custStatus->user->name : 'Not Allot User' }}
+                                        </td>
+                                    @endif
 
                                     <td>{{ $custStatus->name }}</td>
                                     <td>{{ $custStatus->email }}</td>
                                     <td>{{ $custStatus->phone_number }}</td>
                                     <td>{{ Str::upper($custStatus->follow_up) }}</td>
                                     <td>{{ Str::ucfirst($custStatus->status) }}</td>
-                                    @role('superadmin')
+
                                     <td>
-                                        <a href="{{ route('customer.bulkUploadCustomerEdit', ['customer' => $custStatus->id]) }}"
-                                            class="btn btn-info waves-effect waves-light edit">
-                                            <i class="ri-pencil-line"></i>
-                                        </a>
+                                        @role('superadmin')
+                                            <a href="{{ route('customer.bulkUploadCustomerEdit', ['customer' => $custStatus->id]) }}"
+                                                class="btn btn-info waves-effect waves-light edit btn-sm">
+                                                <i class="ri-pencil-line"></i>
+                                            </a>
+
+                                            <a href="{{ route('customer.bulkUploadCustomerView', $custStatus->id) }}"
+                                                class="btn btn-warning btn-sm">{{ 'Customer Profile' }}</a>
+                                        @endrole
+
+
+                                        @role('user')
+                                            <a href="{{ route('customer.bulkUploadCustomerView', $custStatus->id) }}"
+                                                class="btn btn-warning btn-sm">{{ 'Customer Profile' }}</a>
+                                        @endrole
+
+
                                     </td>
-                                    @endrole
 
                                 </tr>
                             @endforeach

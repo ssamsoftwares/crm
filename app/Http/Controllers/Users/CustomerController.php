@@ -53,7 +53,7 @@ class CustomerController extends Controller
         $customer = Customer::with(['comments' => function ($query) {
             $query->orderBy('id', 'desc')->take(5);
         }])
-            ->where('user_id', $authUser->id)
+            // ->where('user_id', $authUser->id)
             ->where('id', $customerId)
             ->first();
         return view('user.comments.add', compact('customer'));
@@ -66,7 +66,10 @@ class CustomerController extends Controller
         ]);
         DB::beginTransaction();
         try {
-            Comment::create($request->all());
+            $data = $request->all();
+            $currentCustFollowUp = Customer::where('id', $request->customer_id)->first();
+            $data['fast_follow_up'] = $currentCustFollowUp->follow_up;
+            Comment::create($data);
         } catch (Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('status', $e->getMessage());
@@ -77,7 +80,7 @@ class CustomerController extends Controller
 
     public function viewAllComments(Request $request, $customerId)
     {
-        $customer = Customer::with(['comments' => function ($query) use ($request) {
+        $customer = Customer::with(['user','comments' => function ($query) use ($request) {
             $query->orderBy('id', 'desc');
 
             // Search by created_at in comments relation
@@ -85,18 +88,25 @@ class CustomerController extends Controller
             if (!empty($search)) {
                 if (Carbon::hasFormat($search, 'd-M-Y')) {
                     $formattedDate = Carbon::createFromFormat('d-M-Y', $search)->format('Y-m-d');
-                    $query->whereDate('created_at', $formattedDate);
+                    $query->whereDate('created_at', $formattedDate)
+                    ->orWhereDate('updated_at', $formattedDate);
                 } else {
-                    $query->where('comments', 'like', '%' . $search . '%');
+                    $query->where(function ($subquery) use ($search) {
+                        $subquery->where('comments.comments', 'like', '%' . $search . '%')
+                        ->orWhere('comments.fast_follow_up', 'like', '%' . $search . '%')
+                            ->orWhereHas('user', function ($userQuery) use ($search) {
+                                $userQuery->where('name', 'like', '%' . $search . '%');
+                            });
+                    });
                 }
             }
         }])
-            ->where('user_id', auth()->user()->id)
+            // ->where('user_id', auth()->user()->id)
             ->where('id', $customerId)
             ->first();
 
         if (!$customer) {
-            abort(404); // Handle the case when customer is not found
+            abort(404);
         }
 
         $comments = $customer->comments()->paginate(15);
@@ -107,7 +117,7 @@ class CustomerController extends Controller
     public function editComment(Comment $comment)
     {
         $comment = Comment::with('customer', 'customer.user')
-            ->where('user_id', auth()->user()->id)
+            // ->where('user_id', auth()->user()->id)
             ->where('id', $comment->id)
             ->first();
             return response()->json(['status'=>200,'data'=>$comment]);
@@ -135,7 +145,6 @@ class CustomerController extends Controller
     public function updateFollowUpStatus(Request $request, $id)
     {
         $customer = Customer::find($id);
-
         if ($customer) {
             $customer->follow_up  = $request->input('follow_up_status');
             $customer->save();

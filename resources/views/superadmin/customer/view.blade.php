@@ -43,7 +43,7 @@
                         </div>
                         <hr />
 
-                        <div class="col-4">
+                        <div class="col-4 mt-2">
                             <strong>Allot User Name :</strong>
                             <span>
                                 {{ isset($customer->user->name) ? $customer->user->name : 'Not alloted' }}
@@ -69,6 +69,14 @@
                                 {{ isset($customer->follow_up) ? Str::upper($customer->follow_up) : 'No Follow Up'}}
                             </span>
                         </div>
+                        <hr>
+
+                        <div class="col-4 mt-2">
+                            <strong>Alloted Date :</strong>
+                            <strong>
+                                {{ isset($customer->alloted_date) ? Carbon\Carbon::createFromTimestamp(strtotime($customer->alloted_date))->format('d-M-Y H:i:s') : ''}}
+                            </strong>
+                        </div>
 
                         <div class="col-8">
                             <strong>Company Name :</strong>
@@ -84,14 +92,14 @@
         </div>
     </div>
 
-    <div class="row">
+    {{-- <div class="row">
         <div class="col-12">
             <div class="card">
                 <strong class="card-header">{{ __('Show All Comment From -') }} <i class="text-primary">
                         {{ $customer->name }}</i> </strong>
                 <div class="justify-content-end d-flex">
-                    {{-- <x-search.table-search action="{{route('customer.bulkUploadCustomerView')}}" method="get" name="search"
-                        value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" btnClass="search_btn" /> --}}
+                    <x-search.table-search action="{{route('customer.bulkUploadCustomerView')}}" method="get" name="search"
+                        value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" btnClass="search_btn" />
                 </div>
                 <div class="card-body shadow-lg p-3 mb-5 bg-white rounded">
                     <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
@@ -99,8 +107,9 @@
                         <thead>
                             <tr>
                                 <th>{{ '#' }}</th>
-                                <th>{{ 'Date' }}</th>
+                                <th>{{ 'Created_at' }}</th>
                                 <th>{{ 'Comments' }}</th>
+                                <th>{{ 'Fast Follow Up' }}</th>
                                 <th>{{ 'Actions' }}</th>
 
                             </tr>
@@ -115,9 +124,10 @@
                                     <td>{{ $i++ }}</td>
                                     <td>{{ $comment->created_at->format('d-M-Y') }}</td>
                                     <td>{!! wordwrap(strip_tags($comment->comments), 70, "<br />\n", true) !!}</td>
-                                    {{-- <td>
+                                    <td></td>
+                                    <td>
                                     <a href="#" class="btn btn-danger btn-sm">Delete</a>
-                                </td> --}}
+                                </td>
                                 </tr>
                             @endforeach
 
@@ -127,5 +137,5 @@
                 </div>
             </div>
         </div> <!-- end col -->
-    </div>
+    </div> --}}
 @endsection

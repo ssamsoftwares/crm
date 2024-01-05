@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('company_name');
             $table->string('status')->nullable();
             $table->string('follow_up')->nullable();
+            $table->string('alloted_date')->nullable();
             $table->timestamps();
             $table->foreign('user_id')
                 ->references('id')->on('users')

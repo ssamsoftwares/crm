@@ -5,7 +5,7 @@
 @endpush
 
 @push('heading')
-    {{ 'All Comments -' }} {{ $customer->name }}
+    {{ 'Customer All Comments -' }} {{ $customer->name }}
 @endpush
 
 @section('content')
@@ -52,9 +52,11 @@
     <a href="{{ url()->previous() }}" class="btn btn-warning btn-sm m-1">
         <i class="fa fa-backward"></i> Back
     </a>
-    <a href="{{ route('user.customersList') }}" class="btn btn-info btn-sm m-1">
-        Customers
-    </a>
+    @role('user')
+        <a href="{{ route('user.customersList') }}" class="btn btn-info btn-sm m-1">
+            Customers </a>
+    @endrole
+
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -80,7 +82,9 @@
                             <tr>
                                 <th>{{ '#' }}</th>
                                 <th>{{ 'Comments' }}</th>
+                                <th>{{ 'Comments By' }}</th>
                                 <th>{{ 'Created at' }}</th>
+                                <th>{{ 'Updated at' }}</th>
                                 <th>{{ 'Action' }}</th>
                             </tr>
                         </thead>
@@ -91,11 +95,16 @@
                             @foreach ($customer->comments as $com)
                                 <tr>
                                     <td>{{ $i++ }}</td>
-                                    <td>{!! wordwrap(strip_tags($com->comments), 70, "<br />\n", true) !!}</td>
-                                    {{-- <td>{{ $com->created_at->format('d-M-Y H:i:s') }}</td> --}}
+                                    <td>{!! wordwrap(strip_tags($com->comments), 70, "<br />\n", true) !!}
+                                    <br>
+                                    <b class="text-primary">Fast Follow Up :</b> {{isset($com->fast_follow_up) ? Str::upper($com->fast_follow_up) : ''}}
+                                    </td>
+
+                                    <td>{{ isset($com->user->name) ? Str::ucfirst($com->user->name) : '' }} </td>
+
                                     <td>{{ $com->created_at->format('d-M-Y') }}</td>
+                                    <td>{{ $com->updated_at->format('d-M-Y') }}</td>
                                     <td>
-                                        {{-- {{ route('user.editComment', $com->id) }} --}}
                                         <a href="javascript:void(0)" class="btn btn-info btn-sm"
                                             onclick="editComment(<?= $com->id ?>)">Edit</a>
                                     </td>
@@ -122,8 +131,22 @@
                         <input type="hidden" name="id" value="">
                         <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                         <input type="hidden" name="customer_id" value="">
-                        <label for="">Comments <span class="text-danger">*</span></label>
-                        <textarea id="elm1" name="comments"></textarea>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <label for="">Comments <span class="text-danger">*</span></label>
+                                <textarea id="elm1" name="comments"></textarea>
+                            </div>
+
+                            <div class="col-lg-12 mt-4">
+                                <label for="">Follow Up</label>
+                                <select class="form-select follow-up-status" name="fast_follow_up">
+                                    <option value="npc">NPC</option>
+                                    <option value="oon">OON</option>
+                                </select>
+                            </div>
+                        </div>
+
+
                     </div>
                     <div class="modal-footer">
                         <button type="submit" name="submit" class="btn btn-primary">Update Comment</button>
@@ -149,6 +172,8 @@
                     tinyMCE.get('elm1').setContent(res.data.comments)
                     $('input[name="id"]').val(res.data.id);
                     $('input[name="customer_id"]').val(res.data.customer_id);
+
+                    $('.follow-up-status').val(res.data.fast_follow_up);
                     model.modal("show")
                 },
                 error: function(error) {
