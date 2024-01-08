@@ -34,6 +34,10 @@ class RolePermissionTableSeeder extends Seeder
             ["name" => "customer-create"],
             ["name" => "customer-edit"],
             ["name" => "customer-delete"],
+            ["name" => "comment-add"],
+            ["name" => "comment-edit"],
+            ["name" => "project-details-list"],
+            ["name" => "project-details-edit"]
         ];
 
         foreach ($roles as $role) {

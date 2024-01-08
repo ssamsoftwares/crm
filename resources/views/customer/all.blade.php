@@ -66,11 +66,12 @@
                         </div>
 
                         <div class="col-3">
-                            <x-form.select label="Follow Up" chooseFileComment="All" name="follow_up" id="follow_up"
-                                :options="[
-                                    'npc' => 'NPC',
-                                    'oon' => 'OON',
-                                ]" :selected="isset($_REQUEST['follow_up']) ? $_REQUEST['follow_up'] : ''" />
+                            <x-form.select label="Communication Medium" chooseFileComment="All" name="communication_medium"
+                                id="communication_medium" :options="[
+                                    'phone' => 'Phone',
+                                    'skype' => 'Skype',
+                                    'whatsApp' => 'WhatsApp',
+                                ]" :selected="isset($_REQUEST['communication_medium']) ? $_REQUEST['communication_medium'] : ''" />
                         </div>
 
                         <div class="col-4">
@@ -85,7 +86,6 @@
                     </div>
                 </form>
 
-
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
@@ -93,13 +93,14 @@
                             <thead>
                                 <tr>
                                     <th>{{ '#' }}</th>
-                                    <th>{{ 'Allot User' }}</th>
+                                    @if (Auth::user()->hasRole('superadmin'))
+                                    <th>{{ 'Allot User' }}</th>@endif
                                     <th>{{ 'Name' }}</th>
-                                    <th>{{ 'Email' }}</th>
+                                    {{-- <th>{{ 'Email' }}</th> --}}
                                     <th>{{ 'Phone' }}</th>
-                                    <th>{{ 'Follow Up' }}</th>
+                                    <th>{{ 'Fast Follow Up' }}</th>
+                                    <th> {{'Communication'}}<br> {{'Medium'}}</th>
                                     <th>{{ 'Status' }}</th>
-                                    <th>{{ 'Comment' }}</th>
                                     <th>{{ 'Actions' }}</th>
                                 </tr>
                             </thead>
@@ -111,27 +112,47 @@
                                 @foreach ($customers as $cust)
                                     <tr>
                                         <td>{{ $i++ }}</td>
-
+                                        @if (Auth::user()->hasRole('superadmin'))
                                         <td class="text-danger">
                                             {{ isset($cust->user->name) ? $cust->user->name : 'Not Allot' }}</td>
-
+                                            @endif
                                         <td>{{ $cust->name }}</td>
-                                        <td>{{ $cust->email }}</td>
+                                        {{-- <td>{{ $cust->email }}</td> --}}
                                         <td>{{ $cust->phone_number }}</td>
 
                                         <td>
                                             <select class="form-select follow-up-status"
                                                 data-customer-id="{{ $cust->id }}">
-                                                <option value="npc" {{ $cust->follow_up == 'npc' ? 'selected' : '' }}>
+                                                <option value="" disabled selected>--Select followUp--</option>
+                                                <option value="npc">
                                                     NPC</option>
-                                                <option value="oon" {{ $cust->follow_up == 'oon' ? 'selected' : '' }}>
+                                                <option value="oon">
                                                     OON</option>
+
+                                                <option value="busy">
+                                                    Busy</option>
+                                            </select>
+                                        </td>
+
+                                        <td>
+                                            <select class="form-select communication-medium"
+                                                data-custmedium-id="{{ $cust->id }}">
+                                                <option value="phone"
+                                                    {{ $cust->communication_medium == 'phone' ? 'selected' : '' }}>
+                                                    Phone</option>
+                                                <option value="skype"
+                                                    {{ $cust->communication_medium == 'skype' ? 'selected' : '' }}>
+                                                    Skype</option>
+
+                                                <option value="whatsApp"
+                                                    {{ $cust->communication_medium == 'whatsApp' ? 'selected' : '' }}>
+                                                    WhatsApp</option>
                                             </select>
                                         </td>
 
                                         <td>
                                             <select class="form-select customer-status"
-                                                data-customerStatus-id="{{ $cust->id }}">
+                                                data-customerstatus-id="{{ $cust->id }}">
                                                 <option value="today" {{ $cust->status == 'today' ? 'selected' : '' }}>
                                                     Today</option>
                                                 <option value="high" {{ $cust->status == 'high' ? 'selected' : '' }}>
@@ -145,14 +166,6 @@
                                             </select>
                                         </td>
 
-
-                                        <td>
-                                            <div class="action-btns text-center" role="group">
-                                                <a href="{{route('user.addComments',$cust->id)}}" class="btn btn-primary btn-sm">Add</a>
-                                                <a href="{{route('user.viewAllComments',$cust->id)}}" class="btn btn-info btn-sm">View/Edit</a>
-                                            </div>
-                                        </td>
-
                                         <td>
                                             <div class="action-btns text-center" role="group">
                                                 <a href="{{ route('customer.bulkUploadCustomerView', $cust->id) }}"
@@ -160,10 +173,7 @@
                                                     <i class="ri-eye-line"></i>
                                                 </a>
 
-                                                <a href="{{ route('customer.bulkUploadCustomerEdit', ['customer' => $cust->id]) }}"
-                                                    class="btn btn-info waves-effect waves-light edit">
-                                                    <i class="ri-pencil-line"></i>
-                                                </a>
+
                                             </div>
                                         </td>
                                     </tr>
@@ -180,42 +190,101 @@
 @endsection
 
 @push('script')
-{{-- STATUS & Follow Status UPDATE --}}
+    {{-- Customer Status Change --}}
     <script>
         $(document).ready(function() {
-            function updateStatus(url, idKey, statusKey, statusType) {
-                return function() {
-                    var itemId = $(this).data(idKey);
-                    var selectedStatus = $(this).val();
-                    $.ajax({
-                        type: 'PATCH',
-                        url: url + '/' + itemId,
-                        data: {
-                            [statusKey]: selectedStatus,
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            if (response.status) {
-                                console.log(statusType + ' updated successfully');
-                            } else {
-                                console.error('Failed to update ' + statusType + ':', response.message);
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Ajax request failed:', error);
+            $('.customer-status').change(function() {
+                var element = $(this);
+                var customerId = element.data('customerstatus-id');
+                console.log(customerId);
+                var selectedStatus = element.val();
+
+                $.ajax({
+                    type: 'PATCH',
+                    url: '/update-customer-status/' + customerId,
+                    data: {
+                        customer_status: selectedStatus,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.status) {
+                            console.log('Status updated successfully');
+                        } else {
+                            console.error('Failed to update status:', response.message);
                         }
-                    });
-                };
-            }
-
-            // Follow-up status change
-            $('.follow-up-status').change(updateStatus('/update-follow-up-status', 'customer-id', 'follow_up_status', 'Follow-up Status'));
-
-            // Customer status change
-            $('.customer-status').change(updateStatus('/update-customer-status', 'customerstatus-id', 'customer_status', 'Customer Status'));
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Ajax request failed:', error);
+                    }
+                });
+            });
         });
     </script>
 
 
 
+    {{-- Customer Communication Medium Change --}}
+    <script>
+        $(document).ready(function() {
+            $('.communication-medium').change(function() {
+                var element = $(this);
+                var custId = element.data('custmedium-id');
+                console.log(custId);
+                var selectedStatus = element.val();
+
+                $.ajax({
+                    type: 'PATCH',
+                    url: '/update-communication-medium/' + custId,
+                    data: {
+                        communication_medium: selectedStatus,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.status) {
+                            console.log(' Communication medium updated successfully');
+                        } else {
+                            console.error('Failed to update medium:', response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Ajax request failed:', error);
+                    }
+                });
+            });
+        });
+    </script>
+
+
+    {{-- Update Fast FollowUp Status --}}
+    <script>
+        $(document).ready(function() {
+            function updateFollowUpStatus(customerId, followUpStatus) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/update-follow-up-status/' + customerId,
+                    data: {
+                        follow_up_status: followUpStatus,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.status) {
+                            console.log('Follow-up status updated successfully');
+                        } else {
+                            console.error('Failed to update follow-up status:', response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Ajax request failed:', error);
+                    }
+                });
+            }
+
+            // Follow-up status change
+            $('.follow-up-status').change(function() {
+                var customerId = $(this).data('customer-id');
+                var followUpStatus = $(this).val();
+                updateFollowUpStatus(customerId, followUpStatus);
+            });
+        });
+    </script>
 @endpush

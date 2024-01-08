@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\Users\CustomerController as UsersCustomerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -68,24 +68,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/customer-edit/{customer?}', [CustomerController::class, 'bulkUploadCustomerEdit'])->name('customer.bulkUploadCustomerEdit');
     Route::post('/customer-edit/{customer?}', [CustomerController::class, 'bulkUploadCustomerUpdate'])->name('customer.bulkUploadCustomerUpdate');
 
+    Route::get('/customer-project-details', [CustomerController::class, 'projectDetailsList'])->name('customer.projectDetailsList');
+    Route::post('/project-details-store', [CustomerController::class, 'projectDetails'])->name('customer.projectDetails');
 
-    // User Comments Routes
-    Route::get('customers-list',[UsersCustomerController::class,'index'])->name('user.customersList');
-    Route::get('customers-comments/{customerId}',[UsersCustomerController::class,'viewAllComments'])->name('user.viewAllComments');
+    Route::get('edit-project-details/{projectdetails_id}',[CustomerController::class,'editProjectDetails'])->name('customer.editProjectDetails');
+    Route::post('update-project-details/{projectdetails_id?}',[CustomerController::class,'updateProjectDetails'])->name('customer.updateProjectDetails');
 
-    Route::get('customers-add-comment/{customerId}',[UsersCustomerController::class,'addComments'])->name('user.addComments');
-    Route::post('customers-add-comment/{customerId?}',[UsersCustomerController::class,'storeComments'])->name('user.storeComments');
+    // add multiple customer name and phone route
 
-    Route::get('customers-edit-comment/{comment}',[UsersCustomerController::class,'editComment'])->name('user.editComment');
-    Route::post('customers-update-comment/{comment?}',[UsersCustomerController::class,'updateComments'])->name('user.updateComments');
+    Route::post('update-cust-details/{customer?}',[CustomerController::class,'addcustNamePhoneNumber'])->name('customer.addcustNamePhoneNumber');
 
 
-    Route::patch('/update-follow-up-status/{id}',[UsersCustomerController::class,'updateFollowUpStatus'])->name('user.updateFollowUpStatus');
+    // Customer Comments Routes
+    Route::get('customers-add-comment/{customerId?}',[CommentController::class,'addComments'])->name('user.addComments');
+    Route::post('customers-add-comment/{customerId?}',[CommentController::class,'storeComments'])->name('user.storeComments');
 
-    Route::patch('/update-customer-status/{id}',[UsersCustomerController::class,'updateCustomerStatus'])->name('user.updateCustomerStatus');
+    Route::get('customers-edit-comment/{comment}',[CommentController::class,'editComment'])->name('user.editComment');
+    Route::post('customers-update-comment/{comment?}',[CommentController::class,'updateComments'])->name('user.updateComments');
+
+    Route::patch('/update-customer-status/{id}',[CommentController::class,'updateCustomerStatus'])->name('customer.updateCustomerStatus');
+    Route::post('/update-follow-up-status/{customerId}', [CommentController::class, 'updateFollowUpStatus'])->name('customer.updateFollowUpStatus');
+
+    Route::patch('/update-communication-medium/{customerId}', [CommentController::class, 'CustomerCommunicationMedium'])->name('customer.customerCommunicationMedium');
 
 });
-
 
 
 require __DIR__ . '/auth.php';

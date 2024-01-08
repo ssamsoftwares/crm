@@ -34,7 +34,7 @@ class UserController extends Controller
 
         $data = $data->paginate(10);
 
-        return view('superadmin.user.all', compact('data'))
+        return view('user.all', compact('data'))
             ->with('i', ($request->input('page', 1) - 1) * 10);
     }
 
@@ -46,7 +46,7 @@ class UserController extends Controller
     {
         // $roles = Role::pluck('name', 'name')->all();
         $roles = Role::whereNotIn('name', ['superadmin'])->pluck('name', 'name')->all();
-        return view('superadmin.user.add', compact('roles'));
+        return view('user.add', compact('roles'));
     }
 
     /**
@@ -90,7 +90,7 @@ class UserController extends Controller
     {
         $user = User::find($id);
 
-        return view('superadmin.user.view', compact('user'));
+        return view('user.view', compact('user'));
     }
 
     /**
@@ -103,7 +103,7 @@ class UserController extends Controller
         $roles = Role::whereNotIn('name', ['superadmin'])->pluck('name', 'name')->all();
         $userRole = $user->roles->pluck('name', 'name')->all();
 
-        return view('superadmin.user.edit', compact('user', 'roles', 'userRole'));
+        return view('user.edit', compact('user', 'roles', 'userRole'));
     }
 
     /**

@@ -12,9 +12,7 @@
     <x-status-message />
 
     <div class="btn">
-        <a href="{{ url()->previous() }}" class="btn btn-warning btn-sm">
-            <i class="fa fa-backward"></i> Back
-        </a>
+        <button type="button" onclick="javascript:history.back()" class="btn btn-warning btn-sm"> <i class="fa fa-backward"></i> Back</button>
     </div>
 
     <div class="row">

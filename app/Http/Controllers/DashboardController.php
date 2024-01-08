@@ -41,10 +41,10 @@ class DashboardController extends Controller
                             ->orWhere('email', 'like', '%' . $search . '%')
                             ->orWhere('phone_number', 'like', '%' . $search . '%')
                             ->orWhere('status', 'like', '%' . $search . '%')
-                            ->orWhere('follow_up', 'like', '%' . $search . '%')
+                            ->orWhere('communication_medium', 'like', '%' . $search . '%')
                             ->orWhere('company_name', 'like', '%' . $search . '%');
                     })
-                    ->paginate(1);
+                    ->paginate(10);
             } else {
                 $total['customerTodayStatus'] = $customerQuery->paginate(10);
             }
@@ -60,10 +60,10 @@ class DashboardController extends Controller
                             ->orWhere('email', 'like', '%' . $search . '%')
                             ->orWhere('phone_number', 'like', '%' . $search . '%')
                             ->orWhere('status', 'like', '%' . $search . '%')
-                            ->orWhere('follow_up', 'like', '%' . $search . '%')
+                            ->orWhere('communication_medium', 'like', '%' . $search . '%')
                             ->orWhere('company_name', 'like', '%' . $search . '%');
                     })
-                    ->paginate(1);
+                    ->paginate(10);
             } else {
                 $total['customerTodayStatus'] = $customerQuery->where('user_id', $authUser->id)->paginate(10);
             }

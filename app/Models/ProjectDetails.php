@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Comment extends Model
+class ProjectDetails extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'customer_id', 'comments','created_at'
+        'user_id','customer_id','project_details_comment'
     ];
 
     public function user()
@@ -23,8 +23,5 @@ class Comment extends Model
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
-
-
-
-
 }
+

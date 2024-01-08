@@ -54,7 +54,6 @@
 
                         </li>
 
-
                         <li class="menu-title">Customers</li>
                         <li>
                             <a href="javascript: void(0);" class="has-arrow waves-effect">
@@ -71,15 +70,23 @@
                         </li>
                     @endrole
 
-
                     @role('user')
+                    <li class="menu-title">{{'Customer Details'}}</li>
                     <li>
-                        <a href="{{route('user.customersList')}}" class="waves-effect">
+                        <a href="{{route('customers')}}" class="waves-effect">
                             <i class="ri-vip-crown-2-line"></i>
                             <span>Customers</span>
                         </a>
                     </li>
                     @endrole
+
+                    <li class="menu-title">{{'Ongoing Project'}}</li>
+                    <li>
+                        <a href="{{route('customer.projectDetailsList')}}" class="waves-effect">
+                            <i class="ri-vip-crown-2-line"></i>
+                            <span>Details</span>
+                        </a>
+                    </li>
 
                 @endauth
 
