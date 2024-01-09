@@ -322,7 +322,7 @@
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="{{route('customer.addcustNamePhoneNumber',$customer->id)}}" method="post">
+                <form action="{{route('customer.addcustName',$customer->id)}}" method="post">
                     @csrf
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="addCustNameModelLabel">{{ 'Add Name' }}</h1>
@@ -403,60 +403,6 @@
             });
         }
     </script>
-    {{-- <script>
-        function openProjectDetailsModal() {
-            var checkbox = document.getElementById('project_details');
-            var hiddenInput = document.getElementById('project_details_status');
-
-            if (checkbox.checked) {
-                // Set the value to 'Yes' when checkbox is checked
-                hiddenInput.value = 'Yes';
-                $('#projectDetailsModel').modal('show');
-            } else {
-                // Set the value to 'No'
-                hiddenInput.value = 'No';
-            }
-        }
-    </script> --}}
-
-    {{-- <script>
-    function handleProjectDetailsChange() {
-        var checkbox = document.getElementById('project_details');
-        var hiddenInput = document.getElementById('project_details_status');
-
-        if (checkbox.checked) {
-            // Set the value to 'Yes' when checkbox is checked
-            hiddenInput.value = 'Yes';
-
-            // Initialize TinyMCE for the 'project_details' textarea
-            tinymce.init({
-                selector: '#project_details',
-                height: 300,
-                plugins: 'link code',
-                toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | code',
-                menubar: false,
-            });
-
-            // Show the modal
-            $('#projectDetailsModel').modal('show');
-        } else {
-            // Set the value to 'No'
-            hiddenInput.value = 'No';
-
-            // Destroy TinyMCE if it was previously initialized
-            tinymce.get('project_details').destroy();
-        }
-    }
-</script> --}}
-    {{-- <script>
-    tinymce.init({
-        selector: '#project_details', // Your textarea ID
-        height: 300,
-        plugins: 'link code',
-        toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | code',
-        menubar: false,
-    });
-</script> --}}
 
     <script>
         function handleProjectDetailsChange() {

@@ -76,7 +76,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // add multiple customer name and phone route
 
-    Route::post('update-cust-details/{customer?}',[CustomerController::class,'addcustNamePhoneNumber'])->name('customer.addcustNamePhoneNumber');
+    Route::post('update-cust-phone-details/{customer?}',[CustomerController::class,'addcustNamePhoneNumber'])->name('customer.addcustNamePhoneNumber');
+
+    Route::post('update-cust-name-details/{customer?}',[CustomerController::class,'addcustName'])->name('customer.addcustName');
 
 
     // Customer Comments Routes

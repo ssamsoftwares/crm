@@ -63,9 +63,13 @@ class CustomerController extends Controller
             $query->where('user_id', $authUser->id);
         });
 
-        $customers = $customersQuery->paginate(10);
+        $customers = $customersQuery->orderBy('id', 'desc')->paginate(10);
 
-        return view('customer.all', compact('customers'));
+        $users = User::where(['status' => 'active',])->whereHas('roles', function ($query) {
+            $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
+        })->get();
+
+        return view('customer.all', compact('customers', 'users'));
     }
 
     public function create()
@@ -244,47 +248,6 @@ class CustomerController extends Controller
         return redirect()->back()->with('status', "Project Details Added Successfully Done!");
     }
 
-
-    // public function projectDetailsList(Request $request)
-    // {
-    //     dd($request->all());
-    //     $query = ProjectDetails::query();
-    //     $usersData = User::where(['status' => 'active',])->whereHas('roles', function ($que) {
-    //             $que->where('name', 'user')->whereNotIn('name', ['superadmin']);
-    //         })->get();
-    //     $searchTerm = $request->input('search');
-    //     // If the user has the 'superadmin' role,
-    //     if (auth()->user()->hasRole('superadmin')) {
-    //         $query->with('user', 'customer');
-
-    //     } else {
-    //         // If the user has the 'user' role,
-    //         $query->where('user_id', auth()->user()->id);
-    //     }
-
-    //     if (!empty($request->search) || !empty($request->user) && (!empty($request->search)) {
-    //         if (Carbon::hasFormat($searchTerm, 'd-M-Y')) {
-    //             $formattedDate = Carbon::createFromFormat('d-M-Y', $searchTerm)->format('Y-m-d');
-    //             $query->whereDate('created_at', $formattedDate);
-    //         } else {
-    //             $query->where(function ($q) use ($searchTerm) {
-    //                 $q->whereHas('user', function ($userQuery) use ($searchTerm) {
-    //                     $userQuery->where('users.name', 'like', "%$searchTerm%");
-    //                 })
-    //                     ->orWhereHas('customer', function ($customerQuery) use ($searchTerm) {
-    //                         $customerQuery->where('name', 'like', "%$searchTerm%")
-    //                             ->orWhere('phone_number', 'like', "%$searchTerm%");
-    //                     })
-    //                     ->orWhere('project_details_comment', 'like', "%$searchTerm%");
-    //             });
-    //         }
-    //     }
-    //     $projectDetailsList = $query->paginate(15);
-
-    //     return view('project_details.all', compact('projectDetailsList','usersData'));
-    // }
-
-
     public function projectDetailsList(Request $request)
     {
         $query = ProjectDetails::query();
@@ -358,26 +321,36 @@ class CustomerController extends Controller
     }
 
     // add multiple customer name and phone
-    public function addcustNamePhoneNumber(Request $request)
+    public function addcustName(Request $request)
     {
-        // dd($request->all());
         DB::beginTransaction();
         try {
             $customer = Customer::find($request->id);
-            if (!empty($request->name)) {
-                $customer->update([
-                    'name' => $customer->name . ',' . $request->name,
-                ]);
-            } else {
-                $customer->update([
-                    'phone_number' => $customer->phone_number . ',' . $request->phone_number,
-                ]);
-            }
+            $customer->update([
+                'name' => $customer->name . ',' . $request->name,
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('status', $e->getMessage());
         }
         DB::commit();
-        return redirect()->back()->with('status', "Name Or phone added Successfully Done!");
+        return redirect()->back()->with('status', "Name added Successfully Done!");
+    }
+
+
+    public function addcustNamePhoneNumber(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $customer = Customer::find($request->id);
+            $customer->update([
+                'phone_number' => $customer->phone_number . ',' . $request->phone_number,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('status', $e->getMessage());
+        }
+        DB::commit();
+        return redirect()->back()->with('status', "Phone added Successfully Done!");
     }
 }

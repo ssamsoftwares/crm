@@ -24,15 +24,6 @@
             <div class="card">
                 <div class="card-body">
 
-                    {{-- <form action="{{route('customer.import')}}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <input type="file" name="file" class="form-control">
-                        <div class="text-center mt-4">
-                            <button type="submit" id="uploadFile" class="btn btn-primary waves-effect waves-light">Import
-                                File</button>
-                        </div>
-                    </form> --}}
-
                     <form action="{{route('customer.import')}}" method="POST" enctype="multipart/form-data"
                         class="dropzone" id="file-upload">
                         @csrf
