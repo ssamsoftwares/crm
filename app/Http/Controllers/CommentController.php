@@ -29,7 +29,6 @@ class CommentController extends Controller
 
     public function storeComments(Request $request, Comment $comment)
     {
-        dd($request->all());
         $this->validate($request, [
             'comments' => 'required',
         ]);

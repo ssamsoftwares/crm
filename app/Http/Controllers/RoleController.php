@@ -50,7 +50,6 @@ class RoleController extends Controller
             'permission' => 'required',
         ]);
 
-        // dd($request->all());
 
         DB::beginTransaction();
         try {
@@ -60,7 +59,7 @@ class RoleController extends Controller
             $role->syncPermissions($permission);
         } catch (Exception $e) {
             DB::rollback();
-            dd($e->getMessage());
+            // dd($e->getMessage());
             return redirect()->back()->with('status', $e->getMessage());
         }
         DB::commit();
@@ -103,8 +102,6 @@ class RoleController extends Controller
         $this->validate($request, [
             'permission' => 'required',
         ]);
-
-        // dd($request->all());
 
         DB::beginTransaction();
 
