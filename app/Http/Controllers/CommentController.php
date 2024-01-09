@@ -92,14 +92,12 @@ class CommentController extends Controller
     public function updateCustomerStatus(Request $request, $id)
     {
         $customer = Customer::find($id);
-
         if ($customer) {
             $customer->status = $request->input('customer_status');
             $customer->update();
 
             return response()->json(['status' => true]);
         }
-
         return response()->json(['status' => false, 'message' => 'Customer not found']);
     }
 
