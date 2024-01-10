@@ -62,6 +62,7 @@
                                     'high' => 'High',
                                     'medium' => 'Medium',
                                     'low' => 'Low',
+                                    'no required' => 'No required',
                                 ]" :selected="isset($_REQUEST['customer_status']) ? $_REQUEST['customer_status'] : ''" />
                         </div>
 
@@ -71,7 +72,9 @@
                                     'phone' => 'Phone',
                                     'skype' => 'Skype',
                                     'whatsApp' => 'WhatsApp',
-                                ]" :selected="isset($_REQUEST['communication_medium']) ? $_REQUEST['communication_medium'] : ''" />
+                                ]" :selected="isset($_REQUEST['communication_medium'])
+                                    ? $_REQUEST['communication_medium']
+                                    : ''" />
                         </div>
 
                         <div class="col-4">
@@ -87,33 +90,34 @@
                 </form>
 
                 @if (Auth::user()->hasRole('superadmin'))
-                <div class="row m-1 mt-1 justify-content-end d-flex">
-                    <div class="col-md-8">
-                        <form action="{{ route('assignCustomer') }}" method="post" id="assignCustomerForm">
-                            @csrf
-                            <div class="row">
-                                <div class="col-lg-8 mt-4">
-                                    <select class="selectUsers form-control" name="user_id">
-                                        <option value="">-- Select User --</option>
-                                        @foreach ($users as $user)
-                                            <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                        @endforeach
+                    <div class="row m-1">
+                        <div class="col-md-6">
+                            <form action="{{ route('assignCustomer') }}" method="post" id="assignCustomerForm">
+                                @csrf
+                                <div class="row">
+                                    <div class="col-lg-8 mt-4">
+                                        <select class="selectUsers form-control" name="user_id">
+                                            <option value="">-- Select User --</option>
+                                            @foreach ($users as $user)
+                                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                            @endforeach
 
-                                    </select>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-lg-4 mt-4">
+                                        <input type="hidden" name="c_ids" id="c_ids">
+                                        <button type="button" id="allotCustomersFromUser" class="btn btn-info btn-sm">
+                                            Allot
+                                            Customer</button>
+                                    </div>
                                 </div>
+                            </form>
+                        </div>
 
-                                <div class="col-lg-4 mt-4">
-                                    <input type="hidden" name="c_ids" id="c_ids">
-                                    <button type="button" id="allotCustomersFromUser" class="btn btn-info btn-sm"> Allot
-                                        Customer</button>
-                                </div>
-                            </div>
-                        </form>
+                        <div class="col-md-4">
+                        </div>
                     </div>
-
-                    <div class="col-md-4">
-                    </div>
-                </div>
                 @endif
 
                 <div class="card-body">
@@ -123,16 +127,19 @@
                             <thead>
                                 <tr>
                                     @if (Auth::user()->hasRole('superadmin'))
-                                    <th>
-                                        <input type="checkbox" class="form-check-input" id="selectAll">
-                                    </th>@endif
+                                        <th>
+                                            <input type="checkbox" class="form-check-input" id="selectAll">
+                                        </th>
+                                    @endif
                                     <th>{{ '#' }}</th>
                                     @if (Auth::user()->hasRole('superadmin'))
-                                    <th>{{ 'Allot User' }}</th>@endif
+                                        <th>{{ 'Allot User' }}</th>
+                                    @endif
                                     <th>{{ 'Name' }}</th>
                                     <th>{{ 'Phone' }}</th>
+                                    <th>{{ 'Company Name' }}</th>
                                     <th>{{ 'Fast Follow Up' }}</th>
-                                    <th> {{'Communication'}}<br> {{'Medium'}}</th>
+                                    <th> {{ 'Communication' }}<br> {{ 'Medium' }}</th>
                                     <th>{{ 'Status' }}</th>
                                     <th>{{ 'Actions' }}</th>
                                 </tr>
@@ -145,19 +152,21 @@
                                 @foreach ($customers as $cust)
                                     <tr>
                                         @if (Auth::user()->hasRole('superadmin'))
-                                        <td>
-                                            <input type="checkbox" class="form-check-input" name="selected_customers[]"
-                                                value="{{ $cust->id }}"
-                                                @if ($cust->user_id != null) checked disabled @endif>
-                                        </td>@endif
+                                            <td>
+                                                <input type="checkbox" class="form-check-input" name="selected_customers[]"
+                                                    value="{{ $cust->id }}"
+                                                    @if ($cust->user_id != null) checked disabled @endif>
+                                            </td>
+                                        @endif
                                         <td>{{ $i++ }}</td>
                                         @if (Auth::user()->hasRole('superadmin'))
-                                        <td class="text-danger">
-                                            {{ isset($cust->user->name) ? $cust->user->name : 'Not Allot' }}</td>
-                                            @endif
+                                            <td class="text-danger">
+                                                {{ isset($cust->user->name) ? $cust->user->name : 'Not Allot' }}</td>
+                                        @endif
                                         <td>{{ $cust->name }}</td>
-                                    
+
                                         <td>{{ $cust->phone_number }}</td>
+                                        <td>{{ isset($cust->company_name) ? Str::ucfirst($cust->company_name) : '' }}</td>
 
                                         <td>
                                             <select class="form-select follow-up-status"
@@ -176,6 +185,7 @@
                                         <td>
                                             <select class="form-select communication-medium"
                                                 data-custmedium-id="{{ $cust->id }}">
+                                                <option value="" disabled selected>--Select medium--</option>
                                                 <option value="phone"
                                                     {{ $cust->communication_medium == 'phone' ? 'selected' : '' }}>
                                                     Phone</option>
@@ -192,6 +202,7 @@
                                         <td>
                                             <select class="form-select customer-status"
                                                 data-customerstatus-id="{{ $cust->id }}">
+                                                <option value="" disabled selected>--Select status--</option>
                                                 <option value="today" {{ $cust->status == 'today' ? 'selected' : '' }}>
                                                     Today</option>
                                                 <option value="high" {{ $cust->status == 'high' ? 'selected' : '' }}>
@@ -202,6 +213,10 @@
 
                                                 <option value="low" {{ $cust->status == 'low' ? 'selected' : '' }}>
                                                     Low</option>
+
+                                                <option value="no required"
+                                                    {{ $cust->status == 'no required' ? 'selected' : '' }}>
+                                                    No required</option>
                                             </select>
                                         </td>
 
@@ -229,39 +244,38 @@
 @endsection
 
 @push('script')
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    {{-- Allot multiple customer to user --}}
+    <script>
+        $(document).ready(function() {
+            $('.selectUsers').select2();
 
-{{-- Allot multiple customer to user --}}
-<script>
-    $(document).ready(function() {
-        $('.selectUsers').select2();
+            $('#allotCustomersFromUser').on('click', function(e) {
+                var allVals = [];
+                $('input[name="selected_customers[]"]:checked:not(:disabled)').each(function() {
+                    allVals.push($(this).val());
+                });
+                if (allVals.length <= 0) {
+                    e.preventDefault();
+                    alert('Please select at least one customer.');
+                    return false;
+                }
+                if ($('.selectUsers').val() == "") {
+                    alert('Please select user.');
+                    return false;
+                }
+                $('#c_ids').val(allVals)
 
-        $('#allotCustomersFromUser').on('click', function(e) {
-            var allVals = [];
-            $('input[name="selected_customers[]"]:checked:not(:disabled)').each(function() {
-                allVals.push($(this).val());
+                $('#assignCustomerForm').submit();
             });
-            if (allVals.length <= 0) {
-                e.preventDefault();
-                alert('Please select at least one customer.');
-                return false;
-            }
-            if ($('.selectUsers').val() == "") {
-                alert('Please select user.');
-                return false;
-            }
-            $('#c_ids').val(allVals)
-
-            $('#assignCustomerForm').submit();
+            $('#selectAll').on('change', function() {
+                $('input[name="selected_customers[]"]:not(:disabled)').prop('checked', $(this).prop(
+                    'checked'));
+            });
         });
-        $('#selectAll').on('change', function() {
-            $('input[name="selected_customers[]"]:not(:disabled)').prop('checked', $(this).prop(
-                'checked'));
-        });
-    });
-</script>
+    </script>
 
 
 

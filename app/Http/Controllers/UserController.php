@@ -77,8 +77,7 @@ class UserController extends Controller
         }
 
         DB::commit();
-
-        return redirect()->back()->with('status', 'User created successfully');
+        return redirect()->route('users.index')->with('status', 'User created successfully');
     }
 
 
@@ -118,8 +117,6 @@ class UserController extends Controller
             // 'roles' => 'required'
         ]);
 
-        // dd($request->all());
-
         DB::beginTransaction();
 
         try {
@@ -134,7 +131,6 @@ class UserController extends Controller
 
             $user = User::find($id);
             $user->update($input);
-
             // Assign the "manager" role
             // $user->assignRole('manager');
             $user->assignRole($request->roles);
@@ -144,8 +140,7 @@ class UserController extends Controller
         }
 
         DB::commit();
-
-        return redirect()->back()->with('status', 'User updated successfully');
+        return redirect()->route('users.index')->with('status', 'User updated successfully');
     }
 
 
@@ -172,6 +167,6 @@ class UserController extends Controller
             return redirect()->back()->with('status', $e->getMessage());
         }
         DB::commit();
-        return redirect()->back()->with('status', 'User deleted successfully');
+        return redirect()->route('users.index')->with('status', 'User deleted successfully');
     }
 }

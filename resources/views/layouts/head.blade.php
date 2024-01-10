@@ -39,7 +39,7 @@
     <!-- App Css-->
     <link href="{{ url('assets/css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css" />
     <!-- Plugins css -->
-    <link href="{{url('assets/libs/dropzone/min/dropzone.min.css')}}" rel="stylesheet" type="text/css" />
+    <link href="{{ url('assets/libs/dropzone/min/dropzone.min.css') }}" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <style>
@@ -54,6 +54,42 @@
         .dataTables_filter {
             display: none;
         }
+
+
+        /* Button Css */
+        .ri-eye-line:before {
+            content: "\ec95";
+            position: absolute;
+            left: 13px;
+            top: 5px;
+        }
+
+        a.btn.btn-primary.waves-effect.waves-light.view {
+            width: 41px;
+            height: 32px;
+        }
+
+        .action-btns.text-center {
+            display: flex;
+            gap: 10px;
+        }
+
+        .ri-pencil-line:before {
+            content: "\ef8c";
+            position: absolute;
+            left: 13px;
+            top: 5px;
+        }
+
+        a.btn.btn-info.waves-effect.waves-light.edit {
+            width: 41px;
+            height: 32px;
+        }
+
+        table.dataTable>tbody>tr.child ul.dtr-details>li {
+            white-space: nowrap !important;
+        }
+        /* responsive filter in table css */
     </style>
 </head>
 @stack('style')

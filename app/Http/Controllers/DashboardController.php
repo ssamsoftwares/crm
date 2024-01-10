@@ -18,6 +18,9 @@ class DashboardController extends Controller
     {
         $authUser = Auth::user();
         $search = $request->search;
+        $customerStatus = $request->customer_status;
+        $communicationMedium = $request->communication_medium;
+
         $total = [
             'users' => User::whereNotIn('id', [$authUser->id])
                 ->whereDoesntHave('roles', function ($query) {
@@ -31,28 +34,34 @@ class DashboardController extends Controller
         $customerQuery = Customer::where('status', 'today');
 
         if ($authUser->hasRole('superadmin')) {
-            if (!empty($search)) {
-                $total['customerTodayStatus'] = $customerQuery
-                    ->where(function ($subquery) use ($search) {
-                        $subquery->where('name', 'like', '%' . $search . '%')
-                            ->orWhereHas('user', function ($userQuery) use ($search) {
-                                $userQuery->where('name', 'like', '%' . $search . '%');
-                            })
-                            ->orWhere('email', 'like', '%' . $search . '%')
-                            ->orWhere('phone_number', 'like', '%' . $search . '%')
-                            ->orWhere('status', 'like', '%' . $search . '%')
-                            ->orWhere('communication_medium', 'like', '%' . $search . '%')
-                            ->orWhere('company_name', 'like', '%' . $search . '%');
-                    })
-                    ->paginate(10);
-            } else {
-                $total['customerTodayStatus'] = $customerQuery->paginate(10);
-            }
+            $customerQuery->where(function ($subquery) use ($search, $customerStatus, $communicationMedium) {
+                if (!empty($search)) {
+                    $subquery->where('name', 'like', '%' . $search . '%')
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('name', 'like', '%' . $search . '%');
+                        })
+                        ->orWhere('email', 'like', '%' . $search . '%')
+                        ->orWhere('phone_number', 'like', '%' . $search . '%')
+                        ->orWhere('status', 'like', '%' . $search . '%')
+                        ->orWhere('communication_medium', 'like', '%' . $search . '%')
+                        ->orWhere('company_name', 'like', '%' . $search . '%');
+                }
+
+                // Filters customer_status and communication_medium
+                if (!empty($customerStatus)) {
+                    $subquery->where('status', $customerStatus);
+                }
+
+                if (!empty($communicationMedium)) {
+                    $subquery->where('communication_medium', $communicationMedium);
+                }
+            });
+
+            $total['customerTodayStatus'] = $customerQuery->paginate(10);
         } elseif ($authUser->hasRole('user')) {
-            if (!empty($search)) {
-                $total['customerTodayStatus'] = $customerQuery
-                    ->where('user_id', $authUser->id)
-                    ->where(function ($subquery) use ($search) {
+            $customerQuery->where('user_id', $authUser->id)
+                ->where(function ($subquery) use ($search, $customerStatus, $communicationMedium) {
+                    if (!empty($search)) {
                         $subquery->where('name', 'like', '%' . $search . '%')
                             ->orWhereHas('user', function ($userQuery) use ($search) {
                                 $userQuery->where('name', 'like', '%' . $search . '%');
@@ -62,11 +71,19 @@ class DashboardController extends Controller
                             ->orWhere('status', 'like', '%' . $search . '%')
                             ->orWhere('communication_medium', 'like', '%' . $search . '%')
                             ->orWhere('company_name', 'like', '%' . $search . '%');
-                    })
-                    ->paginate(10);
-            } else {
-                $total['customerTodayStatus'] = $customerQuery->where('user_id', $authUser->id)->paginate(10);
-            }
+                    }
+
+                    // Filters customer_status and communication_medium
+                    if (!empty($customerStatus)) {
+                        $subquery->where('status', $customerStatus);
+                    }
+
+                    if (!empty($communicationMedium)) {
+                        $subquery->where('communication_medium', $communicationMedium);
+                    }
+                });
+
+            $total['customerTodayStatus'] = $customerQuery->paginate(10);
         }
 
         return view('dashboard')->with(compact('total'));

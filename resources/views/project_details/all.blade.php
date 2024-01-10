@@ -84,6 +84,7 @@
                                     <th>{{ 'Allot User' }}</th>@endif
                                     <th>{{ 'Customer Name' }}</th>
                                     <th>{{ 'Phone Number' }}</th>
+                                    <th>{{ 'Company Name' }}</th>
                                     <th>{{ 'Created at' }}</th>
                                     <th>{{ 'Actions' }}</th>
                                 </tr>
@@ -106,6 +107,9 @@
                                         <td>{{ isset($cust->customer->name) ? $cust->customer->name : '' }}</td>
                                         <td>
                                             {{ isset($cust->customer->phone_number) ? $cust->customer->phone_number : '' }}
+                                        </td>
+                                        <td>
+                                            {{ isset($cust->customer->company_name) ? $cust->customer->company_name : '' }}
                                         </td>
                                         <td>{{ \Carbon\Carbon::parse($cust->created_at)->format('d-M-Y') }}</td>
 

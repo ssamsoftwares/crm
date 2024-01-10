@@ -104,11 +104,11 @@ class CustomerController extends Controller
             return redirect()->back()->with('status', $e->getMessage());
         }
         DB::commit();
-        return redirect()->back()->with('status', 'Customer Added Successfully !');
+        return redirect()->route('customers')->with('status', 'Customer Added Successfully !');
     }
 
 
-    public function bulkUploadCustomerView(Request $request, $customerId)
+    public function bulkUploadCustomerView(Request $request, $customerId = null)
     {
         $customer = Customer::with(['user', 'comments' => function ($query) use ($request) {
             $query->orderBy('id', 'desc');
@@ -150,7 +150,6 @@ class CustomerController extends Controller
 
     public function bulkUploadCustomerUpdate(Request $request, Customer $customer)
     {
-
         $this->validate($request, [
             'name' => 'required',
             'email' => 'required',
@@ -172,7 +171,8 @@ class CustomerController extends Controller
             return redirect()->back()->with('status', $e->getMessage());
         }
         DB::commit();
-        return redirect()->back()->with('status', 'Customer Updated Successfully !');
+        // return redirect()->back()->with('status', 'Customer Updated Successfully !');
+        return redirect()->route('customer.bulkUploadCustomerView', ['customerId' => $customer->id])->with('status', 'Customer Updated Successfully!');
     }
 
     public function importFileView()
@@ -222,14 +222,14 @@ class CustomerController extends Controller
         return redirect()->route('customers')->with('status', "Customer Successfully Assigned on Selected User.");
     }
 
-
     public function projectDetails(Request $request, ProjectDetails $projectDetails)
     {
         DB::beginTransaction();
         try {
             $data = $request->all();
             $customer = Customer::find($request->customer_id);
-            $customer->update(['project_details' => $request->project_details_status]);
+            // $customer->update(['project_details' => $request->project_details_status]);
+            $customer->update(['project_details' => $request->project_details]);
 
             if ($request->project_details_status == 'Yes') {
                 ProjectDetails::create([

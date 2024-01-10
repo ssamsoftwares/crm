@@ -61,10 +61,10 @@
                 background-color: #f32f53;
             }
 
-
             /* input[switch=bool]+label {
-                        background-color: #f32f53;
-                    } */
+              background-color: #f32f53;
+             } */
+
         </style>
     @endpush
 
@@ -86,8 +86,8 @@
                 </div>
 
                 <div class="card-body">
-                    <div class="row mt-lg-4">
-                        <div class="col-4">
+                    <div class="row mt-lg-12">
+                        <div class="col-6">
                             <b>Customer Name :</b>
                             <span>
                                 {{ $customer->name }}
@@ -96,14 +96,7 @@
                                 onclick="addCustomerName(<?= $customer->id ?>)"><i class="fa fa-plus"></i></a>
                         </div>
 
-                        <div class="col-4">
-                            <strong>Email:</strong>
-                            <span>
-                                {{ $customer->email }}
-                            </span>
-                        </div>
-
-                        <div class="col-4">
+                        <div class="col-6">
                             <strong>Phone Number :</strong>
                             <span>
                                 {{ $customer->phone_number }}
@@ -113,7 +106,14 @@
                         </div>
                         <hr />
 
-                        <div class="col-4 mt-2">
+                        <div class="col-4">
+                            <strong>Email:</strong>
+                            <span>
+                                {{ isset($customer->email) ? $customer->email : 'Not found email' }}
+                            </span>
+                        </div>
+
+                        <div class="col-4">
                             <strong>Allot User Name :</strong>
                             <span>
                                 {{ isset($customer->user->name) ? $customer->user->name : 'Not alloted' }}
@@ -122,8 +122,11 @@
 
                         <div class="col-4">
                             <strong>Status :</strong>
-                            <strong>{{ Str::ucfirst($customer->status) }}</strong>
+                            <strong>
+                                {{ isset($customer->status) ? Str::ucfirst($customer->status) : 'No Status' }}
+                            </strong>
                         </div>
+                        <hr>
 
                         <div class="col-4">
                             <strong>{{ 'Communication Medium :' }}</strong>
@@ -131,9 +134,9 @@
                                 {{ isset($customer->communication_medium) ? Str::ucfirst($customer->communication_medium) : 'No Medium' }}
                             </strong>
                         </div>
-                        <hr>
 
-                        <div class="col-4 mt-2">
+
+                        <div class="col-4">
                             <strong>Alloted Date :</strong>
                             <strong>
                                 {{ isset($customer->alloted_date) ? Carbon\Carbon::createFromTimestamp(strtotime($customer->alloted_date))->format('d-M-Y H:i:s') : '' }}
@@ -143,45 +146,25 @@
                         <div class="col-4">
                             <strong>Company Name :</strong>
                             <strong>
-                                {{ $customer->company_name }}
+                                {{ isset($customer->company_name) ? Str::ucfirst($customer->company_name) : 'No found company' }}
                             </strong>
                         </div>
+                        <hr>
 
-                        {{-- <div class="col-4 d-flex">
+                        <div class="col-3">
                             <strong>Project Details :</strong> &nbsp;&nbsp;&nbsp;
-                            <div class="project_details switch-container">
-                                <input type="checkbox" id="project_details" name="project_details" switch="bool"
-                                    value="No" style="width:100px;"
-                                    {{ $customer->project_details === 'No' || is_null($customer->project_details) ? 'checked' : '' }}
-                                    onclick="openProjectDetailsModal()">
-                                <label for="project_details" data-on-label="No" data-off-label="Yes"></label>
-                            </div>
-                        </div> --}}
-                        {{-- <div class="project_details switch-container">
-                            <input type="checkbox" id="project_details" name="project_details" switch="bool"
-                                value="No" style="width:100px;"
-                                {{ $customer->project_details === 'No' || is_null($customer->project_details) ? 'checked' : '' }}
-                                onclick="openProjectDetailsModal()">
-                            <label for="project_details" data-on-label="No" data-off-label="Yes"></label>
-                        </div> --}}
-
-
-                        {{-- <div class="col-4 d-flex w-25">
-                            <strong>Project Details :</strong> &nbsp;&nbsp;&nbsp;
-                            <select name="project_details" id="project_details" class="form-control project_details" onchange="handleProjectDetailsChange()">
-                                <option value="No" {{ $customer->project_details === 'No' || is_null($customer->project_details) ? 'selected' : '' }}>No</option>
-                                <option value="Yes" {{ $customer->project_details == $customer->project_details ? 'selected' : '' }}>Yes</option>
-                            </select>
-                        </div> --}}
-
-                        <div class="col-4 d-flex w-25">
-                            <strong>Project Details :</strong> &nbsp;&nbsp;&nbsp;
-                            <select name="project_details" id="project_details" class="form-control project_details"
+                            <select name="project_details" id="project_details" class="form-control project_details mt-2"
                                 onchange="handleProjectDetailsChange()">
                                 <option value="No">No</option>
-                                <option value="Yes" {{ $customer->project_details === 'Yes' ? 'selected' : '' }}>Yes
+                                <option value="Yes" {{ !empty($customer->project_details) ? 'selected' : ''}}>Yes
                                 </option>
                             </select>
+                        </div>
+
+                        <div class="col-8">
+                            <label for="">Project Description :</label>
+                            <p class="text-dark">
+                                {{ isset($customer->project_details) ? trim($customer->project_details) : 'No project description' }}</p>
                         </div>
 
 
@@ -200,8 +183,8 @@
                 <div class="row m-1 mt-4 justify-content-end d-flex">
 
                     <div class="col-md-8">
-                        <a href="{{ route('user.addComments', $customer->id) }}" class="btn btn-primary btn-sm m-4"><i
-                                class="fa fa-plus"></i> Add Comment</a>
+                        <a href="javascript:void(0)" class="btn btn-primary btn-sm m-4"
+                            onclick="addCustomerComment(<?= $customer->id ?>)"><i class="fa fa-plus"></i> Add Comment</a>
                     </div>
 
                     <div class="col-md-4">
@@ -215,37 +198,39 @@
                 </div>
 
                 <div class="card-body">
-                    <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
-                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                        <thead>
-                            <tr>
-                                <th>{{ '#' }}</th>
-                                <th>{{ 'Date' }}</th>
-                                <th>{{ 'Comments' }}</th>
-                                <th>{{ 'Comments By' }}</th>
-                                <th>{{ 'Action' }}</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @php
-                            $i = 1; @endphp
-                            @foreach ($customer->comments as $com)
+                    <table class="table-responsive">
+                        <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
+                            style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                            <thead>
                                 <tr>
-                                    <td>{{ $i++ }}</td>
-                                    <td>{{ $com->created_at->format('d-M-Y') }}</td>
-                                    <td>{!! wordwrap(strip_tags(Str::ucfirst($com->comments)), 70, "<br />\n", true) !!}
-                                        <br>
-                                    </td>
-
-                                    <td>{{ isset($com->user->name) ? Str::ucfirst($com->user->name) : '' }} </td>
-                                    <td>
-                                        <a href="javascript:void(0)" class="btn btn-info btn-sm"
-                                            onclick="editComment(<?= $com->id ?>)">Edit</a>
-                                    </td>
+                                    <th>{{ '#' }}</th>
+                                    <th>{{ 'Date' }}</th>
+                                    <th>{{ 'Comments' }}</th>
+                                    <th>{{ 'Comments By' }}</th>
+                                    <th>{{ 'Action' }}</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
+                            </thead>
+
+                            <tbody>
+                                @php
+                                $i = 1; @endphp
+                                @foreach ($customer->comments as $com)
+                                    <tr>
+                                        <td>{{ $i++ }}</td>
+                                        <td>{{ $com->created_at->format('d-M-Y') }}</td>
+                                        <td>{!! wordwrap(strip_tags(Str::ucfirst($com->comments)), 70, "<br />\n", true) !!}
+                                            <br>
+                                        </td>
+
+                                        <td>{{ isset($com->user->name) ? Str::ucfirst($com->user->name) : '' }} </td>
+                                        <td>
+                                            <a href="javascript:void(0)" class="btn btn-info btn-sm"
+                                                onclick="editComment(<?= $com->id ?>)">Edit</a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </table>
                     {{ $comments->appends(request()->query())->links() }}
                 </div>
@@ -253,9 +238,39 @@
         </div> <!-- end col -->
     </div> <!-- end row -->
 
+    {{-- Comment Add Model --}}
+    <div class="modal fade" id="addCommentModel" tabindex="-1" aria-labelledby="addCommentModelLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('user.storeComments') }}" method="post">
+                    @csrf
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="addCommentModelLabel">{{ 'Add Comment' }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+                        <input type="hidden" name="customer_id" value="{{ $customer->id }}">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <label for="">Comments <span class="text-danger">*</span></label>
+                                <textarea id="elm1" name="comments"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="submit" class="btn btn-primary">Add Comment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     {{-- Comment Edit Model --}}
 
-    <div class="modal fade" id="commentEditModel" tabindex="-1" aria-labelledby="commentEditModelLabel" aria-hidden="true">
+    <div class="modal fade" id="commentEditModel" tabindex="-1" aria-labelledby="commentEditModelLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <form action="{{ route('user.updateComments') }}" method="post">
@@ -297,7 +312,8 @@
                     <div class="modal-body">
                         @csrf
                         <input type="hidden" name="customer_id" value="{{ $customer->id }}">
-                        <input type="hidden" name="user_id" value="{{ isset($customer->user->id) ?  $customer->user->id : '' }}">
+                        <input type="hidden" name="user_id"
+                            value="{{ isset($customer->user->id) ? $customer->user->id : '' }}">
                         <input type="hidden" name="project_details_status" id="project_details_status" value="">
                         <div class="row">
                             <div class="col-lg-12">
@@ -322,7 +338,7 @@
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="{{route('customer.addcustName',$customer->id)}}" method="post">
+                <form action="{{ route('customer.addcustName', $customer->id) }}" method="post">
                     @csrf
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="addCustNameModelLabel">{{ 'Add Name' }}</h1>
@@ -331,7 +347,8 @@
 
                     <div class="modal-body">
                         <input type="hidden" name="id" value="{{ $customer->id }}">
-                        <input type="hidden" name="user_id" value="{{ isset($customer->user->id) ?  $customer->user->id : '' }}">
+                        <input type="hidden" name="user_id"
+                            value="{{ isset($customer->user->id) ? $customer->user->id : '' }}">
                         <div class="row">
                             <div class="col-lg-12">
                                 <input type="text" name="name" value="" class="form-control"
@@ -353,7 +370,7 @@
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="{{route('customer.addcustNamePhoneNumber',$customer->id)}}" method="post">
+                <form action="{{ route('customer.addcustNamePhoneNumber', $customer->id) }}" method="post">
                     @csrf
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="addCustphoneNumberModelLabel">{{ 'Add Phone Number' }}</h1>
@@ -362,7 +379,8 @@
 
                     <div class="modal-body">
                         <input type="hidden" name="id" value="{{ $customer->id }}">
-                        <input type="hidden" name="user_id" value="{{ isset($customer->user->id) ?  $customer->user->id : '' }}">
+                        <input type="hidden" name="user_id"
+                            value="{{ isset($customer->user->id) ? $customer->user->id : '' }}">
                         <div class="row">
                             <div class="col-lg-12">
                                 <input type="text" name="phone_number" value="" class="form-control"
@@ -381,7 +399,19 @@
 @push('script')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.7.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+
+
+
+    {{-- Add Comment --}}
+    <script>
+        function addCustomerComment() {
+            $('#addCommentModel').modal('show');
+        }
+    </script>
+
+    {{-- Edit Comment --}}
     <script>
         function editComment(comment_id) {
             let url = `{{ url('customers-edit-comment/${comment_id}') }}`
@@ -404,6 +434,8 @@
         }
     </script>
 
+    {{-- Project Details Script --}}
+
     <script>
         function handleProjectDetailsChange() {
             var select = document.getElementById('project_details');
@@ -422,14 +454,13 @@
         }
     </script>
 
-
     {{-- Add Customer Name --}}
     <script>
         function addCustomerName() {
             $('#addCustNameModel').modal('show');
         }
     </script>
-
+    {{-- Add Customer Phone --}}
     <script>
         function addCustomerPhoneNumber() {
             $('#addCustphoneNumberModel').modal('show');

@@ -4,6 +4,65 @@
     <title>{{ 'Dashboard' }}</title>
 @endpush
 
+@push('style')
+    <style>
+        .ri-eye-line:before {
+            content: "\ec95";
+            position: absolute;
+            left: 13px;
+            top: 5px;
+        }
+
+        a.btn.btn-primary.waves-effect.waves-light.view {
+            width: 41px;
+            height: 32px;
+        }
+
+        .action-btns.text-center {
+            display: flex;
+            gap: 10px;
+        }
+
+        .ri-pencil-line:before {
+            content: "\ef8c";
+            position: absolute;
+            left: 13px;
+            top: 5px;
+        }
+
+        a.btn.btn-info.waves-effect.waves-light.edit {
+            width: 41px;
+            height: 32px;
+        }
+
+        table.dataTable>tbody>tr.child ul.dtr-details>li {
+            white-space: nowrap !important;
+        }
+
+        @media screen and (max-width: 676px) and (min-width: 100px) {
+            .hihi {
+                display: flex;
+                flex-direction: column;
+
+            }
+
+            .hihi select {
+                width: 74vw;
+            }
+
+            .my-search {
+                width: 80vw;
+            }
+        }
+
+        @media screen and (max-width: 400px) and (min-width: 100px) {
+            .table.dataTable>tbody>tr.child ul.dtr-details>li {
+                word-wrap: pre-wrap !important;
+            }
+        }
+    </style>
+@endpush
+
 @push('heading')
     {{ 'Dashboard' }}
 @endpush
@@ -29,13 +88,47 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="justify-content-end d-flex">
-                    <x-search.table-search action="{{ route('dashboard') }}" method="get" name="search"
-                        value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" btnClass="search_btn" />
-                </div>
+
+                <form action="{{ route('dashboard') }}" method="get">
+                    <div class="row m-2 hihi">
+                        <div class="col-3">
+                            <x-form.select label="Status" chooseFileComment="All" name="customer_status"
+                                id="customer_status" :options="[
+                                    'today' => 'Today',
+                                    'high' => 'High',
+                                    'medium' => 'Medium',
+                                    'low' => 'Low',
+                                    'no required' => 'No required',
+                                ]" :selected="isset($_REQUEST['customer_status']) ? $_REQUEST['customer_status'] : ''" />
+                        </div>
+
+                        <div class="col-3">
+                            <x-form.select label="Communication Medium" chooseFileComment="All" name="communication_medium"
+                                id="communication_medium" :options="[
+                                    'phone' => 'Phone',
+                                    'skype' => 'Skype',
+                                    'whatsApp' => 'WhatsApp',
+                                ]" :selected="isset($_REQUEST['communication_medium'])
+                                    ? $_REQUEST['communication_medium']
+                                    : ''" />
+                        </div>
+
+                        <div class="col-4 my-search">
+                            <x-form.input name="search" label="Search" type="text" placeholder="Search....."
+                                value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" />
+                        </div>
+
+                        <div class="col-2">
+                            <input type="submit" class="btn btn-primary mt-lg-4" value="Filter">
+                        </div>
+
+                    </div>
+                </form>
+
+
                 <div class="card-body">
                     <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
-                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                        style="border-collapse: collapse; border-spacing: 0; width: 100%; white-space: pre-wrap !important;">
                         <thead>
                             <tr>
                                 <th>{{ '#' }}</th>
@@ -46,6 +139,7 @@
                                 <th>{{ 'Name' }}</th>
                                 <th>{{ 'Email' }}</th>
                                 <th>{{ 'Phone' }}</th>
+                                <th>{{ 'Company Name' }}</th>
                                 <th>{{ 'Follow Up' }}</th>
                                 <th>{{ 'Communication Medium' }}</th>
                                 <th>{{ 'Status' }}</th>
@@ -57,7 +151,6 @@
                             @php
                                 $i = 1;
                             @endphp
-
                             @foreach ($total['customerTodayStatus'] as $cust)
                                 <tr>
                                     <td>{{ $i++ }}</td>
@@ -67,8 +160,10 @@
                                     @endif
 
                                     <td>{{ $cust->name }}</td>
-                                    <td>{{ $cust->email }}</td>
+                                    <td>{{ isset($cust->email) ? $cust->email : 'Not found email' }}</td>
                                     <td>{{ $cust->phone_number }}</td>
+                                    <td>{{ isset($cust->company_name) ? Str::ucfirst($cust->company_name) : 'Not found company' }}
+                                    </td>
 
                                     <td>
                                         <select class="form-select follow-up-status"
@@ -87,6 +182,7 @@
                                     <td>
                                         <select class="form-select communication-medium"
                                             data-custmedium-id="{{ $cust->id }}">
+                                            <option value="" disabled selected>--Select medium--</option>
                                             <option value="phone"
                                                 {{ $cust->communication_medium == 'phone' ? 'selected' : '' }}>
                                                 Phone</option>
@@ -97,12 +193,14 @@
                                             <option value="whatsApp"
                                                 {{ $cust->communication_medium == 'whatsApp' ? 'selected' : '' }}>
                                                 WhatsApp</option>
+
                                         </select>
                                     </td>
 
                                     <td>
                                         <select class="form-select customer-status"
                                             data-customerStatus-id="{{ $cust->id }}">
+                                            <option value="" disabled selected>--Select status--</option>
                                             <option value="today" {{ $cust->status == 'today' ? 'selected' : '' }}>
                                                 Today</option>
                                             <option value="high" {{ $cust->status == 'high' ? 'selected' : '' }}>
@@ -113,6 +211,10 @@
 
                                             <option value="low" {{ $cust->status == 'low' ? 'selected' : '' }}>
                                                 Low</option>
+
+                                            <option value="no required"
+                                                {{ $cust->status == 'no required' ? 'selected' : '' }}>
+                                                No required</option>
                                         </select>
                                     </td>
 
@@ -180,36 +282,36 @@
     </script>
 
 
- {{-- Customer Communication Medium Change --}}
- <script>
-    $(document).ready(function() {
-        $('.communication-medium').change(function() {
-            var element = $(this);
-            var custId = element.data('custmedium-id');
-            console.log(custId);
-            var selectedStatus = element.val();
+    {{-- Customer Communication Medium Change --}}
+    <script>
+        $(document).ready(function() {
+            $('.communication-medium').change(function() {
+                var element = $(this);
+                var custId = element.data('custmedium-id');
+                console.log(custId);
+                var selectedStatus = element.val();
 
-            $.ajax({
-                type: 'PATCH',
-                url: '/update-communication-medium/' + custId,
-                data: {
-                    communication_medium: selectedStatus,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    if (response.status) {
-                        console.log(' Communication medium updated successfully');
-                    } else {
-                        console.error('Failed to update medium:', response.message);
+                $.ajax({
+                    type: 'PATCH',
+                    url: '/update-communication-medium/' + custId,
+                    data: {
+                        communication_medium: selectedStatus,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.status) {
+                            console.log(' Communication medium updated successfully');
+                        } else {
+                            console.error('Failed to update medium:', response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Ajax request failed:', error);
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Ajax request failed:', error);
-                }
+                });
             });
         });
-    });
-</script>
+    </script>
 
 
     {{-- Update Fast FollowUp Status --}}

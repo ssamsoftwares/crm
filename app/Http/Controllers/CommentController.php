@@ -17,11 +17,9 @@ class CommentController extends Controller
 
     public function addComments($customerId)
     {
-        $authUser = Auth::user();
         $customer = Customer::with(['comments' => function ($query) {
-            $query->orderBy('id', 'desc')->take(5);
+            $query->orderBy('id', 'desc')->get();
         }])
-            // ->where('user_id', $authUser->id)
             ->where('id', $customerId)
             ->first();
         return view('comment.add_comment', compact('customer'));
@@ -32,8 +30,7 @@ class CommentController extends Controller
         $this->validate($request, [
             'comments' => 'required',
         ]);
-
-
+        
         DB::beginTransaction();
         try {
             $data = $request->all();
@@ -50,7 +47,6 @@ class CommentController extends Controller
     public function editComment(Comment $comment)
     {
         $comment = Comment::with('customer', 'customer.user')
-            // ->where('user_id', auth()->user()->id)
             ->where('id', $comment->id)
             ->first();
         return response()->json(['status' => 200, 'data' => $comment]);
