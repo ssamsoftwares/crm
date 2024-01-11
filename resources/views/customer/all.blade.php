@@ -55,9 +55,24 @@
 
                 <form action="{{ route('customers') }}" method="get">
                     <div class="row m-2">
+                        @if (Auth::user()->hasRole('superadmin'))
                         <div class="col-3">
-                            <x-form.select label="Status" chooseFileComment="All" name="customer_status" id="customer_status"
-                                :options="[
+                            <label for="">Alloted User</label>
+                            <select name="user" id="" class="form-control">
+                                <option value="">All</option>
+                                <option value="-1" {{ isset($_REQUEST['user']) && $_REQUEST['user'] == -1 ? 'selected' : '' }}>Not Allot</option>
+                                @foreach ($users as $u)
+                                    <option value="{{ $u->id }}" {{ isset($_REQUEST['user']) && $_REQUEST['user'] == $u->id ? 'selected' : '' }}>
+                                        {{ $u->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @endif
+
+                        <div class="col-2">
+                            <x-form.select label="Status" chooseFileComment="All" name="customer_status"
+                                id="customer_status" :options="[
                                     'today' => 'Today',
                                     'high' => 'High',
                                     'medium' => 'Medium',
@@ -77,12 +92,12 @@
                                     : ''" />
                         </div>
 
-                        <div class="col-4">
+                        <div class="col-3">
                             <x-form.input name="search" label="Search" type="text" placeholder="Search....."
                                 value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" />
                         </div>
 
-                        <div class="col-2">
+                        <div class="col-1">
                             <input type="submit" class="btn btn-primary mt-lg-4" value="Filter">
                         </div>
 
@@ -226,6 +241,8 @@
                                                     class="btn btn-primary waves-effect waves-light view">
                                                     <i class="ri-eye-line"></i>
                                                 </a>
+
+                                                <a href="{{route('user.customerAllComment',$cust->id)}}" class="btn btn-warning btn-sm">Comment</a>
 
 
                                             </div>

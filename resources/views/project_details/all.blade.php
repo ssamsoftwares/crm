@@ -54,11 +54,12 @@
             <div class="card">
                     <form action="{{ route('customer.projectDetailsList') }}" method="get">
                         <div class="row m-2">
+                            @if (Auth::user()->hasRole('superadmin'))
                             <div class="col-3">
                                 <x-form.select label="User" chooseFileComment="All" name="user" id="selectUser"
                                 :options="$usersData->pluck('name', 'id')->toArray()"
                                 :selected="isset($selectedUser) ? $selectedUser : ''" />
-                            </div>
+                            </div>@endif
 
                             <div class="col-4">
                                 <x-form.input name="search" label="Search" type="text" placeholder="Search....."

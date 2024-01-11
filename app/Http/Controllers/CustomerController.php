@@ -32,11 +32,44 @@ class CustomerController extends Controller
         $search = $request->search;
         $status = $request->customer_status;
         $communication_medium = $request->communication_medium;
-
+        $selectedUser = $request->input('user');
         $authUser = Auth::user();
 
-        // Apply filters based on user role
-        $customersQuery->when($authUser->hasRole('superadmin'), function ($query) use ($search, $status, $communication_medium) {
+        // Apply filters
+        $customersQuery->when($authUser->hasRole('superadmin'), function ($query) use ($search, $status, $communication_medium, $selectedUser) {
+            $query->where(function ($subquery) use ($search) {
+                $subquery->where('name', 'like', '%' . $search . '%')
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('phone_number', 'like', '%' . $search . '%')
+                    ->orWhere('status', 'like', '%' . $search . '%')
+                    ->orWhere('communication_medium', 'like', '%' . $search . '%')
+                    ->orWhere('company_name', 'like', '%' . $search . '%');
+            });
+
+            if (!empty($status)) {
+                $query->where('status', $status);
+            }
+
+            if (!empty($communication_medium)) {
+                $query->where('communication_medium', $communication_medium);
+            }
+
+            // "Not Allot" user
+            if ($selectedUser === '-1') {
+                $query->whereNull('user_id');
+            } elseif (!empty($selectedUser)) {
+                $query->where('user_id', $selectedUser);
+            }
+        });
+
+        $customersQuery->when($authUser->hasRole('user'), function ($query) use ($search, $status, $communication_medium, $authUser) {
+            // For users, only show their own recordsssss
+            $query->where('user_id', $authUser->id);
+
+            // Allow searching on users records
             $query->where(function ($subquery) use ($search) {
                 $subquery->where('name', 'like', '%' . $search . '%')
                     ->orWhereHas('user', function ($userQuery) use ($search) {
@@ -58,19 +91,17 @@ class CustomerController extends Controller
             }
         });
 
-        // For users, only show their own records
-        $customersQuery->when($authUser->hasRole('user'), function ($query) use ($authUser) {
-            $query->where('user_id', $authUser->id);
-        });
-
         $customers = $customersQuery->orderBy('id', 'desc')->paginate(10);
 
-        $users = User::where(['status' => 'active',])->whereHas('roles', function ($query) {
-            $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
-        })->get();
+        $users = User::where(['status' => 'active'])
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
+            })->get();
 
         return view('customer.all', compact('customers', 'users'));
     }
+
+
 
     public function create()
     {

@@ -30,7 +30,7 @@ class CommentController extends Controller
         $this->validate($request, [
             'comments' => 'required',
         ]);
-        
+
         DB::beginTransaction();
         try {
             $data = $request->all();
@@ -110,7 +110,36 @@ class CommentController extends Controller
     }
 
 
+    public function customerAllComment(Request $request, $customerId = null)
+    {
+        $customer = Customer::with(['user', 'comments' => function ($query) use ($request) {
+            $query->orderBy('id', 'desc');
+            // Search by created_at in comments relation
+            $search = $request->search;
+            if (!empty($search)) {
+                if (Carbon::hasFormat($search, 'd-M-Y')) {
+                    $formattedDate = Carbon::createFromFormat('d-M-Y', $search)->format('Y-m-d');
+                    $query->whereDate('created_at', $formattedDate);
+                } else {
+                    $query->where(function ($subquery) use ($search) {
+                        $subquery->where('comments.comments', 'like', '%' . $search . '%')
+                            ->orWhereHas('user', function ($userQuery) use ($search) {
+                                $userQuery->where('name', 'like', '%' . $search . '%');
+                            });
+                    });
+                }
+            }
+        }])
+            // ->where('user_id', auth()->user()->id)
+            ->where('id', $customerId)
+            ->first();
 
+        if (!$customer) {
+            abort(404);
+        }
 
+        $comments = $customer->comments()->paginate(15);
 
+        return view('comment.index', compact('customer', 'comments'));
+    }
 }
