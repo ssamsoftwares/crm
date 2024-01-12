@@ -10,6 +10,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redirect;
+use PhpParser\Node\Stmt\Return_;
 
 class CommentController extends Controller
 {
@@ -139,7 +141,23 @@ class CommentController extends Controller
         }
 
         $comments = $customer->comments()->paginate(15);
-
         return view('comment.index', compact('customer', 'comments'));
+    }
+
+
+    public function customerProjectDetailsAddEdit(Request $request, $customerId = null)
+    {
+        if ($customerId) {
+            // Edit operation
+            $customer = Customer::findOrFail($customerId);
+            $customer->update([
+                'project_details' => $request->project_details,
+            ]);
+        } else {
+            $customer = new Customer();
+            $customer->project_details = $request->project_details;
+            $customer->save();
+        }
+        return Redirect::back()->with('status', 'Project details saved successfully');
     }
 }

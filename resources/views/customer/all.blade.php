@@ -242,7 +242,7 @@
                                                     <i class="ri-eye-line"></i>
                                                 </a>
 
-                                                <a href="{{route('user.customerAllComment',$cust->id)}}" class="btn btn-warning btn-sm">Comment</a>
+                                                <a href="{{route('customer.customerAllComment',$cust->id)}}" class="btn btn-warning btn-sm">Comment</a>
 
 
                                             </div>
@@ -294,10 +294,6 @@
         });
     </script>
 
-
-
-
-
     {{-- Customer Status Change --}}
     <script>
         $(document).ready(function() {
@@ -329,8 +325,6 @@
         });
     </script>
 
-
-
     {{-- Customer Communication Medium Change --}}
     <script>
         $(document).ready(function() {
@@ -361,7 +355,6 @@
             });
         });
     </script>
-
 
     {{-- Update Fast FollowUp Status --}}
     <script>

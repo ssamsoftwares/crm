@@ -61,10 +61,6 @@
                 background-color: #f32f53;
             }
 
-            /* input[switch=bool]+label {
-              background-color: #f32f53;
-             } */
-
         </style>
     @endpush
 
@@ -156,7 +152,7 @@
                             <select name="project_details" id="project_details" class="form-control project_details mt-2"
                                 onchange="handleProjectDetailsChange()">
                                 <option value="No">No</option>
-                                <option value="Yes" {{ !empty($customer->project_details) ? 'selected' : ''}}>Yes
+                                <option value="Yes" {{ !empty($customer->project_details) ? 'selected' : '' }}>Yes
                                 </option>
                             </select>
                         </div>
@@ -164,7 +160,8 @@
                         <div class="col-8">
                             <label for="">Project Description :</label>
                             <p class="text-dark">
-                                {{ isset($customer->project_details) ? trim($customer->project_details) : 'No project description' }}</p>
+                                {{ isset($customer->project_details) ? trim($customer->project_details) : 'No project description' }}
+                            </p>
                         </div>
 
 
@@ -198,7 +195,7 @@
                 </div>
 
                 <div class="card-body">
-                    <table class="table-responsive">
+                        <div class="table-responsive">
                         <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
                             style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead>
@@ -231,7 +228,7 @@
                                 @endforeach
                             </tbody>
                         </table>
-                    </table>
+                    </div>
                     {{ $comments->appends(request()->query())->links() }}
                 </div>
             </div>
@@ -239,8 +236,7 @@
     </div> <!-- end row -->
 
     {{-- Comment Add Model --}}
-    <div class="modal fade" id="addCommentModel" tabindex="-1" aria-labelledby="addCommentModelLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="addCommentModel" tabindex="-1" aria-labelledby="addCommentModelLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <form action="{{ route('user.storeComments') }}" method="post">
@@ -255,7 +251,8 @@
                         <div class="row">
                             <div class="col-lg-12">
                                 <label for="">Comments <span class="text-danger">*</span></label>
-                                <textarea id="elm1" name="comments"></textarea>
+                                {{-- <textarea id="elm1" name="comments"></textarea> --}}
+                                <textarea name="comments" id="" cols="30" rows="10" class="form-control"></textarea>
                             </div>
                         </div>
                     </div>
@@ -286,7 +283,8 @@
                         <div class="row">
                             <div class="col-lg-12">
                                 <label for="">Comments <span class="text-danger">*</span></label>
-                                <textarea id="elm1" name="comments"></textarea>
+                                {{-- <textarea id="elm1" name="comments"></textarea> --}}
+                                <textarea id="editCommentId" name="comments" class="form-control"></textarea>
                             </div>
                         </div>
                     </div>
@@ -402,8 +400,6 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 
-
-
     {{-- Add Comment --}}
     <script>
         function addCustomerComment() {
@@ -420,7 +416,8 @@
                 url: url,
                 success: function(res) {
                     let model = $('#commentEditModel')
-                    tinyMCE.get('elm1').setContent(res.data.comments)
+                    // tinyMCE.get('elm1').setContent(res.data.comments)
+                    $('textarea[name="comments"]').val(stripHtmlTags(res.data.comments));
                     $('input[name="id"]').val(res.data.id);
                     $('input[name="customer_id"]').val(res.data.customer_id);
 
@@ -431,6 +428,11 @@
                     console.log(error);
                 }
             });
+        }
+
+        function stripHtmlTags(html) {
+            var doc = new DOMParser().parseFromString(html, 'text/html');
+            return doc.body.textContent || "";
         }
     </script>
 

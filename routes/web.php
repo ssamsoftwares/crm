@@ -93,7 +93,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::patch('/update-communication-medium/{customerId}', [CommentController::class, 'CustomerCommunicationMedium'])->name('customer.customerCommunicationMedium');
 
-     Route::get('/customer-comment-list/{customerId?}', [CommentController::class, 'customerAllComment'])->name('user.customerAllComment');
+     Route::get('/customer-comment-list/{customerId?}', [CommentController::class, 'customerAllComment'])->name('customer.customerAllComment');
+
+     Route::post('/project-details-update/{customerId?}', [CommentController::class, 'customerProjectDetailsAddEdit'])->name('customer.customerProjectDetailsAddEdit');
+
 
 
 

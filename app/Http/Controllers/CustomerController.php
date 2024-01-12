@@ -14,8 +14,11 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use SebastianBergmann\CodeCoverage\Report\Xml\Project;
 use Spatie\Permission\Models\Role;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class CustomerController extends Controller
 {
@@ -26,18 +29,15 @@ class CustomerController extends Controller
      *---------------------------------------------------------------------
      */
 
-    public function bulkUploadCustomer(Request $request)
+    public function getBulkUploadCustomerData(Request $request)
     {
         $customersQuery = Customer::with('user', 'comments');
-        $search = $request->search;
-        $status = $request->customer_status;
-        $communication_medium = $request->communication_medium;
-        $selectedUser = $request->input('user');
         $authUser = Auth::user();
 
         // Apply filters
-        $customersQuery->when($authUser->hasRole('superadmin'), function ($query) use ($search, $status, $communication_medium, $selectedUser) {
-            $query->where(function ($subquery) use ($search) {
+        $customersQuery->when($authUser->hasRole('superadmin'), function ($query) use ($request) {
+            $query->where(function ($subquery) use ($request) {
+                $search = $request->search;
                 $subquery->where('name', 'like', '%' . $search . '%')
                     ->orWhereHas('user', function ($userQuery) use ($search) {
                         $userQuery->where('name', 'like', '%' . $search . '%');
@@ -46,8 +46,13 @@ class CustomerController extends Controller
                     ->orWhere('phone_number', 'like', '%' . $search . '%')
                     ->orWhere('status', 'like', '%' . $search . '%')
                     ->orWhere('communication_medium', 'like', '%' . $search . '%')
-                    ->orWhere('company_name', 'like', '%' . $search . '%');
+                    ->orWhere('company_name', 'like', '%' . $search . '%')
+                    ->orWhere('project_details', 'like', '%' . $search . '%');
             });
+
+            $status = $request->customer_status;
+            $communication_medium = $request->communication_medium;
+            $selectedUser = $request->input('user');
 
             if (!empty($status)) {
                 $query->where('status', $status);
@@ -65,12 +70,12 @@ class CustomerController extends Controller
             }
         });
 
-        $customersQuery->when($authUser->hasRole('user'), function ($query) use ($search, $status, $communication_medium, $authUser) {
-            // For users, only show their own recordsssss
+        $customersQuery->when($authUser->hasRole('user'), function ($query) use ($request, $authUser) {
+            // For users, only show their own records
             $query->where('user_id', $authUser->id);
 
-            // Allow searching on users records
-            $query->where(function ($subquery) use ($search) {
+            $query->where(function ($subquery) use ($request) {
+                $search = $request->search;
                 $subquery->where('name', 'like', '%' . $search . '%')
                     ->orWhereHas('user', function ($userQuery) use ($search) {
                         $userQuery->where('name', 'like', '%' . $search . '%');
@@ -82,6 +87,9 @@ class CustomerController extends Controller
                     ->orWhere('company_name', 'like', '%' . $search . '%');
             });
 
+            $status = $request->customer_status;
+            $communication_medium = $request->communication_medium;
+
             if (!empty($status)) {
                 $query->where('status', $status);
             }
@@ -91,17 +99,46 @@ class CustomerController extends Controller
             }
         });
 
-        $customers = $customersQuery->orderBy('id', 'desc')->paginate(10);
+        $perPage = 10;
+        $customers = $customersQuery->orderBy('id', 'desc')->paginate($perPage);
 
         $users = User::where(['status' => 'active'])
             ->whereHas('roles', function ($query) {
                 $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
             })->get();
 
+        return [$customers, $users];
+    }
+
+    // customer list
+    public function bulkUploadCustomer(Request $request)
+    {
+        [$customers, $users] = $this->getBulkUploadCustomerData($request);
         return view('customer.all', compact('customers', 'users'));
     }
 
+    // project details list
+    public function projectDetailsList(Request $request)
+    {
+        [$customers, $users] = $this->getBulkUploadCustomerData($request);
 
+        $filteredCustomers = $customers->filter(function ($customer) {
+            return $customer->project_details !== null;
+        });
+
+        // Paginate
+        $perPage = 10;
+        $currentPage = $request->query('page', 1);
+        $paginatedCustomers = new LengthAwarePaginator(
+            $filteredCustomers->forPage($currentPage, $perPage),
+            $filteredCustomers->count(),
+            $perPage,
+            $currentPage,
+            ['path' => url()->current(), 'query' => $request->query()]
+        );
+
+        return view('project_details.all', compact('paginatedCustomers', 'users'));
+    }
 
     public function create()
     {
@@ -137,7 +174,6 @@ class CustomerController extends Controller
         DB::commit();
         return redirect()->route('customers')->with('status', 'Customer Added Successfully !');
     }
-
 
     public function bulkUploadCustomerView(Request $request, $customerId = null)
     {
@@ -278,76 +314,32 @@ class CustomerController extends Controller
         return redirect()->back()->with('status', "Project Details Added Successfully Done!");
     }
 
-    public function projectDetailsList(Request $request)
-    {
-        $query = ProjectDetails::query();
-        $usersData = User::where(['status' => 'active',])->whereHas('roles', function ($que) {
-            $que->where('name', 'user')->whereNotIn('name', ['superadmin']);
-        })->get();
-
-        $searchTerm = $request->search;
-        $selectedUser = $request->user;
-
-        // If the user has the 'superadmin' role,
-        if (auth()->user()->hasRole('superadmin')) {
-            $query->with('user', 'customer');
-        } else {
-            // If the user has the 'user' role,
-            $query->where('user_id', auth()->user()->id);
-        }
-
-        // Apply user filter
-        if (!empty($selectedUser)) {
-            $query->where('user_id', $selectedUser);
-        }
-
-        if (!empty($searchTerm)) {
-            if (Carbon::hasFormat($searchTerm, 'd-M-Y')) {
-                $formattedDate = Carbon::createFromFormat('d-M-Y', $searchTerm)->format('Y-m-d');
-                $query->whereDate('created_at', $formattedDate);
-            } else {
-                $query->where(function ($q) use ($searchTerm) {
-                    $q->whereHas('user', function ($userQuery) use ($searchTerm) {
-                        $userQuery->where('users.name', 'like', "%$searchTerm%");
-                    })
-                        ->orWhereHas('customer', function ($customerQuery) use ($searchTerm) {
-                            $customerQuery->where('name', 'like', "%$searchTerm%")
-                                ->orWhere('phone_number', 'like', "%$searchTerm%");
-                        })
-                        ->orWhere('project_details_comment', 'like', "%$searchTerm%");
-                });
-            }
-        }
-
-        $projectDetailsList = $query->paginate(15);
-
-        return view('project_details.all', compact('projectDetailsList', 'usersData', 'selectedUser'));
-    }
 
     public function editProjectDetails($projectdetails_id)
     {
-        $projectDetails = ProjectDetails::with('customer', 'user')
+        $projectDetails = Customer::with('user')
             ->where('id', $projectdetails_id)
             ->first();
         return response()->json(['status' => 200, 'data' => $projectDetails]);
     }
 
+
     public function updateProjectDetails(Request $request)
     {
-
-        $this->validate($request, [
-            'project_details_comment' => 'required',
-        ]);
         DB::beginTransaction();
         try {
-            $projectDetails = ProjectDetails::find($request->id);
-            $projectDetails->update($request->all());
+            // $projectDetails = ProjectDetails::find($request->id);
+            // $projectDetails->update($request->all());
+            $projectDetails = Customer::find($request->id);
+            $projectDetails->update([
+                'project_details' => $request->project_details,
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('status', $e->getMessage());
+            return Redirect::back()->with('status', $e->getMessage());
         }
         DB::commit();
-        return redirect()->back()->with('status', "Project Details Updated Successfully Done!");
+        return Redirect::back()->with('status', "Project Details Updated Successfully Done!");
     }
 
     // add multiple customer name and phone
