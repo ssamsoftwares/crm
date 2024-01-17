@@ -107,6 +107,8 @@
                                     <th>{{ '#' }}</th>
                                     <th>{{ 'Date' }}</th>
                                     <th>{{ 'Comments' }}</th>
+                                    <th>{{ 'Customer Name' }}</th>
+                                    <th>{{ 'Company Name' }}</th>
                                     <th>{{ 'Comments By' }}</th>
                                     <th>{{ 'Action' }}</th>
                                 </tr>
@@ -122,6 +124,10 @@
                                         <td>{!! wordwrap(strip_tags(Str::ucfirst($com->comments)), 70, "<br />\n", true) !!}
                                             <br>
                                         </td>
+
+                                        <td>{{ isset($com->customer->name) ? Str::ucfirst($com->customer->name) : '' }} </td>
+
+                                        <td>{{ isset($com->customer->company_name) ? Str::ucfirst($com->customer->company_name) : '' }} </td>
 
                                         <td>{{ isset($com->user->name) ? Str::ucfirst($com->user->name) : '' }} </td>
                                         <td>

@@ -50,27 +50,30 @@
     <x-status-message />
 
     <div class="row">
-        <div class="col-12">
+        <div class="col-lg-12">
             <div class="card">
 
                 <form action="{{ route('customers') }}" method="get">
                     <div class="row m-2">
                         @if (Auth::user()->hasRole('superadmin'))
-                        <div class="col-3">
-                            <label for="">Alloted User</label>
-                            <select name="user" id="" class="form-control">
-                                <option value="">All</option>
-                                <option value="-1" {{ isset($_REQUEST['user']) && $_REQUEST['user'] == -1 ? 'selected' : '' }}>Not Allot</option>
-                                @foreach ($users as $u)
-                                    <option value="{{ $u->id }}" {{ isset($_REQUEST['user']) && $_REQUEST['user'] == $u->id ? 'selected' : '' }}>
-                                        {{ $u->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                            <div class="col-lg-3">
+                                <label for="">Alloted User</label>
+                                <select name="user" id="" class="form-control userFilter">
+                                    <option value="">All</option>
+                                    <option value="-1"
+                                        {{ isset($_REQUEST['user']) && $_REQUEST['user'] == -1 ? 'selected' : '' }}>Not
+                                        Allot</option>
+                                    @foreach ($users as $u)
+                                        <option value="{{ $u->id }}"
+                                            {{ isset($_REQUEST['user']) && $_REQUEST['user'] == $u->id ? 'selected' : '' }}>
+                                            {{ $u->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         @endif
 
-                        <div class="col-2">
+                        <div class="col-lg-3">
                             <x-form.select label="Status" chooseFileComment="All" name="customer_status"
                                 id="customer_status" :options="[
                                     'today' => 'Today',
@@ -81,7 +84,7 @@
                                 ]" :selected="isset($_REQUEST['customer_status']) ? $_REQUEST['customer_status'] : ''" />
                         </div>
 
-                        <div class="col-3">
+                        {{-- <div class="col-lg-3">
                             <x-form.select label="Communication Medium" chooseFileComment="All" name="communication_medium"
                                 id="communication_medium" :options="[
                                     'phone' => 'Phone',
@@ -90,14 +93,14 @@
                                 ]" :selected="isset($_REQUEST['communication_medium'])
                                     ? $_REQUEST['communication_medium']
                                     : ''" />
-                        </div>
+                        </div> --}}
 
-                        <div class="col-3">
+                        <div class="col-lg-3">
                             <x-form.input name="search" label="Search" type="text" placeholder="Search....."
                                 value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" />
                         </div>
 
-                        <div class="col-1">
+                        <div class="col-lg-1">
                             <input type="submit" class="btn btn-primary mt-lg-4" value="Filter">
                         </div>
 
@@ -106,7 +109,7 @@
 
                 @if (Auth::user()->hasRole('superadmin'))
                     <div class="row m-1">
-                        <div class="col-md-6">
+                        <div class="col-lg-6">
                             <form action="{{ route('assignCustomer') }}" method="post" id="assignCustomerForm">
                                 @csrf
                                 <div class="row">
@@ -154,7 +157,8 @@
                                     <th>{{ 'Phone' }}</th>
                                     <th>{{ 'Company Name' }}</th>
                                     <th>{{ 'Fast Follow Up' }}</th>
-                                    <th> {{ 'Communication' }}<br> {{ 'Medium' }}</th>
+                                    <th>{{ 'Comments' }}</th>
+                                    {{-- <th> {{ 'Communication' }}<br> {{ 'Medium' }}</th> --}}
                                     <th>{{ 'Status' }}</th>
                                     <th>{{ 'Actions' }}</th>
                                 </tr>
@@ -198,6 +202,11 @@
                                         </td>
 
                                         <td>
+                                            <a href="javascript:void(0)" class="btn btn-success btn-sm"
+                                                onclick="viewCustomerComment(<?= $cust->id ?>)">View Comment</a>
+                                        </td>
+
+                                        {{-- <td>
                                             <select class="form-select communication-medium"
                                                 data-custmedium-id="{{ $cust->id }}">
                                                 <option value="" disabled selected>--Select medium--</option>
@@ -212,7 +221,7 @@
                                                     {{ $cust->communication_medium == 'whatsApp' ? 'selected' : '' }}>
                                                     WhatsApp</option>
                                             </select>
-                                        </td>
+                                        </td> --}}
 
                                         <td>
                                             <select class="form-select customer-status"
@@ -242,7 +251,8 @@
                                                     <i class="ri-eye-line"></i>
                                                 </a>
 
-                                                <a href="{{route('customer.customerAllComment',$cust->id)}}" class="btn btn-warning btn-sm">Comment</a>
+                                                <a href="{{ route('customer.customerAllComment', $cust->id) }}"
+                                                    class="btn btn-warning btn-sm">Comment</a>
 
 
                                             </div>
@@ -252,22 +262,152 @@
                             </tbody>
                         </table>
                     </div>
-
                     {{ $customers->appends(request()->query())->links() }}
                 </div>
             </div>
         </div> <!-- end col -->
     </div> <!-- end row -->
+
+    {{-- Cooment Model Form --}}
+
+    <div class="modal fade" id="commentViewModel" tabindex="-1" aria-labelledby="commentViewModelLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-dark" id="commentViewModelLabel">{{ 'View Comments' }}</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul id="commentList"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
 @endsection
 
 @push('script')
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    {{-- View Customer Comment --}}
+    {{-- <script>
+        function viewCustomerComment(customerId) {
+            $.ajax({
+                url: '/getCustomerComment/' + customerId,
+                type: 'GET',
+                success: function(response) {
+                    var comments = response.comments;
+                    var commentList = $('#commentList');
+                    commentList.empty();
+
+                    if (comments.length > 0) {
+                        comments.forEach(function(comment) {
+                            commentList.append('<li>' + comment.comments + '</li>');
+                        });
+                    } else {
+                        commentList.append('<strong>No comments available.</strong>');
+                    }
+                    // Show the modal
+                    $('#commentViewModel').modal('show');
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+    </script> --}}
+
+    {{--
+    <script>
+        function viewCustomerComment(customerId) {
+            $.ajax({
+                url: '/getCustomerComment/' + customerId,
+                type: 'GET',
+                success: function(response) {
+                    var comments = response.comments;
+                    var commentList = $('#commentList');
+                    commentList.empty();
+
+                    if (comments.length > 0) {
+                        comments.forEach(function(comment) {
+                            var formattedDate = new Date(comment.created_at).toLocaleDateString(
+                            'en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            });
+
+                            var listItem = $('<li></li>');
+                            listItem.append('<strong>' + comment.comments + ' - ' + formattedDate + '</strong>');
+                            commentList.append(listItem);
+                        });
+                    } else {
+                        commentList.append('<strong>No comments available.</strong>');
+                    }
+
+                    // Show the modal
+                    $('#commentViewModel').modal('show');
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+    </script> --}}
+
+    <script>
+        function viewCustomerComment(customerId) {
+            $.ajax({
+                url: '/getCustomerComment/' + customerId,
+                type: 'GET',
+                success: function(response) {
+                    var comments = response.comments;
+                    var commentList = $('#commentList');
+                    commentList.empty();
+
+                    if (comments.length > 0) {
+                        comments.forEach(function(comment) {
+                            var formattedDate = new Date(comment.created_at).toLocaleDateString(
+                            'en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            });
+
+                            var listItem = $('<li></li>');
+                            var commentContainer = $('<div></div>');
+                            var commentText = $('<strong>' + comment.comments + '</strong>');
+                            var dateText = $('<span style="color: red; font-weight: bold;">' + ' - ' +
+                                formattedDate + '</span>')
+
+                            commentContainer.append(commentText);
+                            commentContainer.append(dateText);
+                            listItem.append(commentContainer);
+                            commentList.append(listItem);
+                        });
+                    } else {
+                        commentList.append('<strong>No comments available.</strong>');
+                    }
+
+                    // Show the modal
+                    $('#commentViewModel').modal('show');
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+    </script>
+
+
 
     {{-- Allot multiple customer to user --}}
     <script>
         $(document).ready(function() {
             $('.selectUsers').select2();
+            $('.userFilter').select2();
 
             $('#allotCustomersFromUser').on('click', function(e) {
                 var allVals = [];

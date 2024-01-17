@@ -69,7 +69,7 @@
     {{-- <a href="javascript:void(0);" onclick="goBack()" class="btn btn-warning btn-sm m-1">
         <i class="fa fa-backward"></i> Back
     </a> --}}
-    <a href="{{route('customers')}}" class="btn btn-warning btn-sm m-1">
+    <a href="{{ route('customers') }}" class="btn btn-warning btn-sm m-1">
         <i class="fa fa-backward"></i> Back
     </a>
 
@@ -206,6 +206,8 @@
                                     <th>{{ '#' }}</th>
                                     <th>{{ 'Date' }}</th>
                                     <th>{{ 'Comments' }}</th>
+                                    <th>{{ 'Customer Name' }}</th>
+                                    <th>{{ 'Company Name' }}</th>
                                     <th>{{ 'Comments By' }}</th>
                                     <th>{{ 'Action' }}</th>
                                 </tr>
@@ -220,6 +222,12 @@
                                         <td>{{ $com->created_at->format('d-M-Y') }}</td>
                                         <td>{!! wordwrap(strip_tags(Str::ucfirst($com->comments)), 70, "<br />\n", true) !!}
                                             <br>
+                                        </td>
+
+                                        <td>{{ isset($com->customer->name) ? Str::ucfirst($com->customer->name) : '' }}
+                                        </td>
+
+                                        <td>{{ isset($com->customer->company_name) ? Str::ucfirst($com->customer->company_name) : '' }}
                                         </td>
 
                                         <td>{{ isset($com->user->name) ? Str::ucfirst($com->user->name) : '' }} </td>

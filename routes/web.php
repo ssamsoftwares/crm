@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\URL;
 if (env('APP_ENV') === 'production') {
     //URL::forceSchema('https');
    \URL::forceScheme('https');
-}   
+}
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -80,6 +80,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('update-cust-phone-details/{customer?}',[CustomerController::class,'addcustNamePhoneNumber'])->name('customer.addcustNamePhoneNumber');
 
     Route::post('update-cust-name-details/{customer?}',[CustomerController::class,'addcustName'])->name('customer.addcustName');
+
+    Route::get('getCustomerComment/{customerId?}',[CustomerController::class,'getCustomerComment'])->name('customer.getCustomerComment');
 
 
     // Customer Comments Routes

@@ -50,12 +50,12 @@
     <x-status-message />
 
     <div class="row">
-        <div class="col-12">
+        <div class="col-lg-12">
             <div class="card">
                 <form action="{{ route('customer.projectDetailsList') }}" method="get">
                     <div class="row m-2">
                         @if (Auth::user()->hasRole('superadmin'))
-                            <div class="col-3">
+                            <div class="col-lg-3">
                                 <label for="">Alloted User</label>
                                 <select name="user" id="" class="form-control selectUsers">
                                     <option value="">All</option>
@@ -72,12 +72,12 @@
                             </div>
                         @endif
 
-                        <div class="col-5">
+                        <div class="col-lg-5">
                             <x-form.input name="search" label="Search" type="text" placeholder="Search....."
                                 value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" />
                         </div>
 
-                        <div class="col-1 mt-1">
+                        <div class="col-lg-1 mt-1">
                             <input type="submit" class="btn btn-primary mt-lg-4" value="Filter">
                         </div>
 

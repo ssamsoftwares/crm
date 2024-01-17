@@ -169,10 +169,10 @@ class CustomerController extends Controller
             Customer::create($data);
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('status', $e->getMessage());
+            return Redirect::back()->with('status', $e->getMessage());
         }
         DB::commit();
-        return redirect()->route('customers')->with('status', 'Customer Added Successfully !');
+        return Redirect::route('customers')->with('status', 'Customer Added Successfully !');
     }
 
     public function bulkUploadCustomerView(Request $request, $customerId = null)
@@ -190,6 +190,10 @@ class CustomerController extends Controller
                         $subquery->where('comments.comments', 'like', '%' . $search . '%')
                             ->orWhereHas('user', function ($userQuery) use ($search) {
                                 $userQuery->where('name', 'like', '%' . $search . '%');
+                            })
+                            ->orWhereHas('customer', function ($customerQuery) use ($search) {
+                                $customerQuery->where('name', 'like', '%' . $search . '%')
+                                    ->orWhere('company_name', 'like', '%' . $search . '%');
                             });
                     });
                 }
@@ -230,16 +234,20 @@ class CustomerController extends Controller
                 $data['alloted_date'] = Carbon::now();
             }
 
+            if ($customer->user_id == NULL) {
+                $data['alloted_date']  = Carbon::now();
+            }
+
             $data['status'] = $request->customer_status;
 
             $customer->update($data);
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('status', $e->getMessage());
+            return Redirect::back()->with('status', $e->getMessage());
         }
         DB::commit();
         // return redirect()->back()->with('status', 'Customer Updated Successfully !');
-        return redirect()->route('customer.bulkUploadCustomerView', ['customerId' => $customer->id])->with('status', 'Customer Updated Successfully!');
+        return Redirect::route('customer.bulkUploadCustomerView', ['customerId' => $customer->id])->with('status', 'Customer Updated Successfully!');
     }
 
     public function importFileView()
@@ -278,7 +286,7 @@ class CustomerController extends Controller
                 'Content-Disposition' => 'attachment; filename=' . $fileName,
             ]);
         }
-        return redirect()->back()->with('status', 'Sample CSV file Not Found.');
+        return Redirect::back()->with('status', 'Sample CSV file Not Found.');
     }
 
     public function assignCustomer(Request $request)
@@ -286,7 +294,7 @@ class CustomerController extends Controller
         $cId_arr = explode(',', $request->input('c_ids'));
 
         $customer = Customer::whereIn('id', $cId_arr)->update(['user_id' => $request->input('user_id')]);
-        return redirect()->route('customers')->with('status', "Customer Successfully Assigned on Selected User.");
+        return Redirect::route('customers')->with('status', "Customer Successfully Assigned on Selected User.");
     }
 
     public function projectDetails(Request $request, ProjectDetails $projectDetails)
@@ -307,11 +315,11 @@ class CustomerController extends Controller
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('status', $e->getMessage());
+            return Redirect::back()->with('status', $e->getMessage());
         }
 
         DB::commit();
-        return redirect()->back()->with('status', "Project Details Added Successfully Done!");
+        return Redirect::back()->with('status', "Project Details Added Successfully Done!");
     }
 
 
@@ -353,10 +361,10 @@ class CustomerController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('status', $e->getMessage());
+            return Redirect::back()->with('status', $e->getMessage());
         }
         DB::commit();
-        return redirect()->back()->with('status', "Name added Successfully Done!");
+        return Redirect::back()->with('status', "Name added Successfully Done!");
     }
 
 
@@ -370,9 +378,16 @@ class CustomerController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('status', $e->getMessage());
+            return Redirect::back()->with('status', $e->getMessage());
         }
         DB::commit();
-        return redirect()->back()->with('status', "Phone added Successfully Done!");
+        return Redirect::back()->with('status', "Phone added Successfully Done!");
+    }
+
+
+    public function getCustomerComment($customerId)
+    {
+        $comments = Comment::where('customer_id', $customerId)->get();
+        return response()->json(['comments' => $comments]);
     }
 }
