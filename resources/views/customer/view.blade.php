@@ -60,16 +60,19 @@
             input[switch=bool]:checked+label {
                 background-color: #f32f53;
             }
-
         </style>
     @endpush
 
     <x-status-message />
 
     {{-- Customer Profile details --}}
-    <a href="{{ url()->previous() }}" class="btn btn-warning btn-sm m-1">
+    {{-- <a href="javascript:void(0);" onclick="goBack()" class="btn btn-warning btn-sm m-1">
+        <i class="fa fa-backward"></i> Back
+    </a> --}}
+    <a href="{{route('customers')}}" class="btn btn-warning btn-sm m-1">
         <i class="fa fa-backward"></i> Back
     </a>
+
     <div class="row">
         <div class="col-lg-12">
             <div class="card border border-secondary rounded">
@@ -195,7 +198,7 @@
                 </div>
 
                 <div class="card-body">
-                        <div class="table-responsive">
+                    <div class="table-responsive">
                         <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
                             style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead>
@@ -466,6 +469,12 @@
     <script>
         function addCustomerPhoneNumber() {
             $('#addCustphoneNumberModel').modal('show');
+        }
+    </script>
+
+    <script>
+        function goBack() {
+            window.history.back();
         }
     </script>
 @endpush

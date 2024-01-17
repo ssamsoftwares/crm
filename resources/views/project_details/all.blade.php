@@ -57,7 +57,7 @@
                         @if (Auth::user()->hasRole('superadmin'))
                             <div class="col-3">
                                 <label for="">Alloted User</label>
-                                <select name="user" id="" class="form-control">
+                                <select name="user" id="" class="form-control selectUsers">
                                     <option value="">All</option>
                                     <option value="-1"
                                         {{ isset($_REQUEST['user']) && $_REQUEST['user'] == -1 ? 'selected' : '' }}>Not
@@ -176,6 +176,11 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+
+        $(document).ready(function () {
+            $('.selectUsers').select2();
+        });
+
         function editprojectdetails(projectdetails_id) {
             let url = `{{ url('edit-project-details/${projectdetails_id}') }}`
             console.log("Requesting URL: ", url);

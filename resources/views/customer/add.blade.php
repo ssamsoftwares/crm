@@ -9,7 +9,7 @@
 @endpush
 
 @push('style')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @endpush
 
 @section('content')
@@ -68,15 +68,16 @@
                                         'high' => 'High',
                                         'medium' => 'Medium',
                                         'low' => 'Low',
+                                        'no required' => 'No required',
                                     ]" />
                             </div>
 
                             <div class="col-lg-6">
-                                <x-form.select name="communication_medium" label="Communication Medium" chooseFileComment="--Select Medium--"
-                                    :options="[
+                                <x-form.select name="communication_medium" label="Communication Medium"
+                                    chooseFileComment="--Select Medium--" :options="[
                                         'phone' => 'Phone',
                                         'skype' => 'Skype',
-                                        'whatsApp' => 'WhatsApp'
+                                        'whatsApp' => 'WhatsApp',
                                     ]" />
                             </div>
 
@@ -93,11 +94,10 @@
 @endsection
 
 @push('script')
-
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-$(document).ready(function() {
-    $('.selectUsers').select2();
-});
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.selectUsers').select2();
+        });
+    </script>
 @endpush

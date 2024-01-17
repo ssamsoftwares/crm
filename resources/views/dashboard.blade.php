@@ -5,6 +5,7 @@
 @endpush
 
 @push('style')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .ri-eye-line:before {
             content: "\ec95";
@@ -91,16 +92,21 @@
 
                 <form action="{{ route('dashboard') }}" method="get">
                     <div class="row m-2 hihi">
+
+                        @if (Auth::user()->hasRole('superadmin'))
                         <div class="col-3">
-                            <x-form.select label="Status" chooseFileComment="All" name="customer_status"
-                                id="customer_status" :options="[
-                                    'today' => 'Today',
-                                    'high' => 'High',
-                                    'medium' => 'Medium',
-                                    'low' => 'Low',
-                                    'no required' => 'No required',
-                                ]" :selected="isset($_REQUEST['customer_status']) ? $_REQUEST['customer_status'] : ''" />
+                            <label for="">Alloted User</label>
+                            <select name="user" id="" class="form-control selectUsers">
+                                <option value="">All</option>
+                                <option value="-1" {{ isset($_REQUEST['user']) && $_REQUEST['user'] == -1 ? 'selected' : '' }}>Not Allot</option>
+                                @foreach ($users as $u)
+                                    <option value="{{ $u->id }}" {{ isset($_REQUEST['user']) && $_REQUEST['user'] == $u->id ? 'selected' : '' }}>
+                                        {{ $u->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
+                        @endif
 
                         <div class="col-3">
                             <x-form.select label="Communication Medium" chooseFileComment="All" name="communication_medium"
@@ -251,8 +257,11 @@
 
 
 @push('script')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
+            $('.selectUsers').select2();
+
             $('.customer-status').change(function() {
                 var element = $(this);
                 var customerId = element.data('customerstatus-id');
@@ -285,6 +294,8 @@
     {{-- Customer Communication Medium Change --}}
     <script>
         $(document).ready(function() {
+            $('.selectUsers').select2();
+
             $('.communication-medium').change(function() {
                 var element = $(this);
                 var custId = element.data('custmedium-id');

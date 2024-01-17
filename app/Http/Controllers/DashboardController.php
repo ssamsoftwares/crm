@@ -14,6 +14,7 @@ class DashboardController extends Controller
      * Handle the incoming request.
      */
 
+
     public function __invoke(Request $request)
     {
         $authUser = Auth::user();
@@ -32,9 +33,10 @@ class DashboardController extends Controller
         ];
 
         $customerQuery = Customer::where('status', 'today');
+        $selectedUser = $request->input('user');
 
         if ($authUser->hasRole('superadmin')) {
-            $customerQuery->where(function ($subquery) use ($search, $customerStatus, $communicationMedium) {
+            $customerQuery->where(function ($subquery) use ($search, $customerStatus, $communicationMedium, $selectedUser) {
                 if (!empty($search)) {
                     $subquery->where('name', 'like', '%' . $search . '%')
                         ->orWhereHas('user', function ($userQuery) use ($search) {
@@ -54,6 +56,13 @@ class DashboardController extends Controller
 
                 if (!empty($communicationMedium)) {
                     $subquery->where('communication_medium', $communicationMedium);
+                }
+
+                // "Not Allot" user
+                if ($selectedUser === '-1') {
+                    $subquery->whereNull('user_id');
+                } elseif (!empty($selectedUser)) {
+                    $subquery->where('user_id', $selectedUser);
                 }
             });
 
@@ -86,6 +95,11 @@ class DashboardController extends Controller
             $total['customerTodayStatus'] = $customerQuery->paginate(10);
         }
 
-        return view('dashboard')->with(compact('total'));
+        $users = User::where(['status' => 'active'])
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
+            })->get();
+
+        return view('dashboard', compact('total', 'users'));
     }
 }

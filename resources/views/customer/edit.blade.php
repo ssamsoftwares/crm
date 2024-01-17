@@ -71,14 +71,15 @@
                                         'high' => 'High',
                                         'medium' => 'Medium',
                                         'low' => 'Low',
+                                        'no required' => 'No required',
                                     ]" :selected="$customer->status" />
                             </div>
                             <div class="col-lg-6">
-                                <x-form.select name="communication_medium" label="Communication Medium" chooseFileComment="--Select Medium--"
-                                    :options="[
+                                <x-form.select name="communication_medium" label="Communication Medium"
+                                    chooseFileComment="--Select Medium--" :options="[
                                         'phone' => 'Phone',
                                         'skype' => 'Skype',
-                                        'whatsApp' => 'WhatsApp'
+                                        'whatsApp' => 'WhatsApp',
                                     ]" :selected="$customer->communication_medium" />
                             </div>
                         </div>
