@@ -23,8 +23,9 @@ use Illuminate\Support\Facades\URL;
 */
 
 if (env('APP_ENV') === 'production') {
-    URL::forceSchema('https');
-}
+    //URL::forceSchema('https');
+   \URL::forceScheme('https');
+}   
 
 Route::get('/', function () {
     return redirect()->route('login');
