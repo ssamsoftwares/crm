@@ -66,40 +66,43 @@
     <x-status-message />
 
     {{-- Customer Profile details --}}
-    {{-- <a href="{{ url()->previous() }}" class="btn btn-warning btn-sm m-1">
-        <i class="fa fa-backward"></i> Back
-    </a> --}}
-
-    <a href="{{route('customers')}}" class="btn btn-warning btn-sm m-1">
+    <a href="{{ route('customers') }}" class="btn btn-warning btn-sm m-1">
         <i class="fa fa-backward"></i> Back
     </a>
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <strong class="card-header">{{ __('Show All Comment From -') }} <i class="text-primary">
-                        {{ $customer->name }}</i> </strong>
+                <div class="card-header">
+                    <h5>{{ __('Show All Comment') }}</h5>
+                    <strong>{{ 'Name' }} :</strong> <i class="text-primary">
+                        {{ $customer->name }}</i> &nbsp;&nbsp;&nbsp;
+
+                    <strong>{{ 'Company Name ' }} :</strong> <i class="text-primary">
+                        {{ $customer->company_name }}</i>
+                </div>
+
                 <div class="row m-1 mt-4 justify-content-end d-flex">
 
                     <div class="col-md-8">
                         <a href="javascript:void(0)" class="btn btn-primary btn-sm m-4"
                             onclick="addCustomerComment(<?= $customer->id ?>)"><i class="fa fa-plus"></i> Add Comment</a>
 
-                            <a href="javascript:void(0)" class="btn btn-success btn-sm m-4"
-                            onclick="projectDetailsData(<?= $customer->id ?>)"> Add/Edit Project Details  <i class="fa fa-eye"></i> </a>
+                        <a href="javascript:void(0)" class="btn btn-success btn-sm m-4"
+                            onclick="projectDetailsData(<?= $customer->id ?>)"> Add/Edit Project Details <i
+                                class="fa fa-eye"></i> </a>
                     </div>
 
                     <div class="col-md-4">
                         <div class="col-lg-12">
                             <x-search.table-search action="{{ route('customer.customerAllComment', $customer->id) }}"
                                 method="get" name="search"
-                                value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}"
-                                btnClass="search_btn" />
+                                value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" btnClass="search_btn" />
                         </div>
                     </div>
                 </div>
 
                 <div class="card-body">
-                        <div class="table-responsive">
+                    <div class="table-responsive">
                         <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
                             style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead>
@@ -107,8 +110,6 @@
                                     <th>{{ '#' }}</th>
                                     <th>{{ 'Date' }}</th>
                                     <th>{{ 'Comments' }}</th>
-                                    <th>{{ 'Customer Name' }}</th>
-                                    <th>{{ 'Company Name' }}</th>
                                     <th>{{ 'Comments By' }}</th>
                                     <th>{{ 'Action' }}</th>
                                 </tr>
@@ -117,17 +118,15 @@
                             <tbody>
                                 @php
                                 $i = 1; @endphp
-                                @foreach ($customer->comments as $com)
+                                {{-- @foreach ($customer->comments as $com) --}}
+                                @foreach ($comments as $com)
                                     <tr>
-                                        <td>{{ $i++ }}</td>
+                                        <td>{{ ($comments->perPage() * ($comments->currentPage() - 1)) + $loop->index + 1 }}</td>
+
                                         <td>{{ $com->created_at->format('d-M-Y') }}</td>
                                         <td>{!! wordwrap(strip_tags(Str::ucfirst($com->comments)), 70, "<br />\n", true) !!}
                                             <br>
                                         </td>
-
-                                        <td>{{ isset($com->customer->name) ? Str::ucfirst($com->customer->name) : '' }} </td>
-
-                                        <td>{{ isset($com->customer->company_name) ? Str::ucfirst($com->customer->company_name) : '' }} </td>
 
                                         <td>{{ isset($com->user->name) ? Str::ucfirst($com->user->name) : '' }} </td>
                                         <td>
@@ -176,8 +175,7 @@
 
     {{-- Comment Edit Model --}}
 
-    <div class="modal fade" id="commentEditModel" tabindex="-1" aria-labelledby="commentEditModelLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="commentEditModel" tabindex="-1" aria-labelledby="commentEditModelLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <form action="{{ route('user.updateComments') }}" method="post">
@@ -211,7 +209,7 @@
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="{{ route('customer.customerProjectDetailsAddEdit',$customer->id) }}" method="post">
+                <form action="{{ route('customer.customerProjectDetailsAddEdit', $customer->id) }}" method="post">
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="projectDetailsModelLabel">{{ 'Customer Project Details' }}</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -239,8 +237,6 @@
             </div>
         </div>
     </div>
-
-
 @endsection
 @push('script')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.7.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -290,5 +286,4 @@
             $('#projectDetailsModel').modal('show');
         }
     </script>
-
 @endpush

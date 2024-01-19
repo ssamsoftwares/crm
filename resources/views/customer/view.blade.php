@@ -66,9 +66,6 @@
     <x-status-message />
 
     {{-- Customer Profile details --}}
-    {{-- <a href="javascript:void(0);" onclick="goBack()" class="btn btn-warning btn-sm m-1">
-        <i class="fa fa-backward"></i> Back
-    </a> --}}
     <a href="{{ route('customers') }}" class="btn btn-warning btn-sm m-1">
         <i class="fa fa-backward"></i> Back
     </a>
@@ -178,10 +175,16 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <strong class="card-header">{{ __('Show All Comment From -') }} <i class="text-primary">
-                        {{ $customer->name }}</i> </strong>
-                <div class="row m-1 mt-4 justify-content-end d-flex">
+                <div class="card-header">
+                    <h5>{{ __('Show All Comment From -') }}</h5>
+                    <strong>{{ 'Name' }} :</strong> <i class="text-primary">
+                        {{ $customer->name }}</i> &nbsp;&nbsp;&nbsp;
 
+                    <strong>{{ 'Company Name ' }} :</strong> <i class="text-primary">
+                        {{ $customer->company_name }}</i>
+                </div>
+
+                <div class="row m-1 mt-4 justify-content-end d-flex">
                     <div class="col-md-8">
                         <a href="javascript:void(0)" class="btn btn-primary btn-sm m-4"
                             onclick="addCustomerComment(<?= $customer->id ?>)"><i class="fa fa-plus"></i> Add Comment</a>
@@ -206,8 +209,6 @@
                                     <th>{{ '#' }}</th>
                                     <th>{{ 'Date' }}</th>
                                     <th>{{ 'Comments' }}</th>
-                                    <th>{{ 'Customer Name' }}</th>
-                                    <th>{{ 'Company Name' }}</th>
                                     <th>{{ 'Comments By' }}</th>
                                     <th>{{ 'Action' }}</th>
                                 </tr>
@@ -216,18 +217,14 @@
                             <tbody>
                                 @php
                                 $i = 1; @endphp
-                                @foreach ($customer->comments as $com)
+                                @foreach ($comments as $com)
                                     <tr>
-                                        <td>{{ $i++ }}</td>
+                                        <td>{{ ($comments->perPage() * ($comments->currentPage() - 1)) + $loop->index + 1 }}</td>
+
                                         <td>{{ $com->created_at->format('d-M-Y') }}</td>
+
                                         <td>{!! wordwrap(strip_tags(Str::ucfirst($com->comments)), 70, "<br />\n", true) !!}
                                             <br>
-                                        </td>
-
-                                        <td>{{ isset($com->customer->name) ? Str::ucfirst($com->customer->name) : '' }}
-                                        </td>
-
-                                        <td>{{ isset($com->customer->company_name) ? Str::ucfirst($com->customer->company_name) : '' }}
                                         </td>
 
                                         <td>{{ isset($com->user->name) ? Str::ucfirst($com->user->name) : '' }} </td>
@@ -480,9 +477,4 @@
         }
     </script>
 
-    <script>
-        function goBack() {
-            window.history.back();
-        }
-    </script>
 @endpush

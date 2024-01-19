@@ -16,7 +16,7 @@ use PhpParser\Node\Stmt\Return_;
 class CommentController extends Controller
 {
 
-
+    // add Comment
     public function addComments($customerId)
     {
         $customer = Customer::with(['comments' => function ($query) {
@@ -27,6 +27,7 @@ class CommentController extends Controller
         return view('comment.add_comment', compact('customer'));
     }
 
+    // Store Comment
     public function storeComments(Request $request, Comment $comment)
     {
         $this->validate($request, [
@@ -39,13 +40,14 @@ class CommentController extends Controller
             Comment::create($data);
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('status', $e->getMessage());
+            return Redirect::back()->with('status', $e->getMessage());
         }
         DB::commit();
-        return redirect()->back()->with('status', "Comment Add Successfully Done!");
+        return Redirect::back()->with('status', "Comment Add Successfully Done!");
     }
 
 
+    // Edit Comment
     public function editComment(Comment $comment)
     {
         $comment = Comment::with('customer', 'customer.user')
@@ -54,6 +56,8 @@ class CommentController extends Controller
         return response()->json(['status' => 200, 'data' => $comment]);
     }
 
+
+    // Update Comment
     public function updateComments(Request $request)
     {
         $this->validate($request, [
@@ -65,12 +69,14 @@ class CommentController extends Controller
             $comment->update($request->all());
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('status', $e->getMessage());
+            return Redirect::back()->with('status', $e->getMessage());
         }
         DB::commit();
-        return redirect()->back()->with('status', "Comment Updated Successfully Done!");
+        return Redirect::back()->with('status', "Comment Updated Successfully Done!");
     }
 
+
+    // Update Follow Up (Comment)
     public function updateFollowUpStatus(Request $request, $customerId)
     {
         $customer = Customer::find($customerId);
@@ -86,6 +92,11 @@ class CommentController extends Controller
 
         return response()->json(['status' => false, 'message' => 'Customer not found']);
     }
+
+
+
+    // Update Customer Status
+
     public function updateCustomerStatus(Request $request, $id)
     {
         $customer = Customer::find($id);
@@ -97,6 +108,9 @@ class CommentController extends Controller
         }
         return response()->json(['status' => false, 'message' => 'Customer not found']);
     }
+
+
+    // Update Customer Communication Medium
 
 
     public function CustomerCommunicationMedium(Request $request, $id)
@@ -112,37 +126,8 @@ class CommentController extends Controller
     }
 
 
-    // public function customerAllComment(Request $request, $customerId = null)
-    // {
-    //     $customer = Customer::with(['user', 'comments' => function ($query) use ($request) {
-    //         $query->orderBy('id', 'desc');
-    //         // Search by created_at in comments relation
-    //         $search = $request->search;
-    //         if (!empty($search)) {
-    //             if (Carbon::hasFormat($search, 'd-M-Y')) {
-    //                 $formattedDate = Carbon::createFromFormat('d-M-Y', $search)->format('Y-m-d');
-    //                 $query->whereDate('created_at', $formattedDate);
-    //             } else {
-    //                 $query->where(function ($subquery) use ($search) {
-    //                     $subquery->where('comments.comments', 'like', '%' . $search . '%')
-    //                         ->orWhereHas('user', function ($userQuery) use ($search) {
-    //                             $userQuery->where('name', 'like', '%' . $search . '%');
-    //                         });
-    //                 });
-    //             }
-    //         }
-    //     }])
-    //         // ->where('user_id', auth()->user()->id)
-    //         ->where('id', $customerId)
-    //         ->first();
 
-    //     if (!$customer) {
-    //         abort(404);
-    //     }
-
-    //     $comments = $customer->comments()->paginate(15);
-    //     return view('comment.index', compact('customer', 'comments'));
-    // }
+    // Customer All Comment List
 
     public function customerAllComment(Request $request, $customerId = null)
     {
@@ -176,16 +161,18 @@ class CommentController extends Controller
             abort(404);
         }
 
-        $comments = $customer->comments()->paginate(15);
+        $comments = $customer->comments()->paginate(10);
         return view('comment.index', compact('customer', 'comments'));
     }
 
 
 
+    // Update Customer ProjectDetails AddEdit
+
     public function customerProjectDetailsAddEdit(Request $request, $customerId = null)
     {
         if ($customerId) {
-            // Edit operation
+            // Edit
             $customer = Customer::findOrFail($customerId);
             $customer->update([
                 'project_details' => $request->project_details,

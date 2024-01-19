@@ -164,7 +164,8 @@
                                 @endphp
                                 @foreach ($total['customerTodayStatus'] as $cust)
                                     <tr>
-                                        <td>{{ $i++ }}</td>
+                                        <td>{{ ($total['customerTodayStatus']->currentPage() - 1) * $total['customerTodayStatus']->perPage() + $loop->index + 1 }}</td>
+
                                         @if (auth()->user()->hasRole('superadmin'))
                                             <td>{{ isset($cust->user->name) ? $cust->user->name : 'Not Allot User' }}
                                             </td>

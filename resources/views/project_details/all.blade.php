@@ -109,7 +109,11 @@
                                 @endphp
                                 @foreach ($paginatedCustomers as $cust)
                                     <tr>
-                                        <td>{{ $i++ }}</td>
+
+                                        <td>
+                                            {{ ($paginatedCustomers->currentPage() - 1) * $paginatedCustomers->perPage() + $loop->index + 1 }}
+                                        </td>
+
                                         <td>{!! wordwrap(strip_tags(Str::ucfirst($cust->project_details)), 80, "<br />\n", true) !!}
                                             <br>
                                         </td>
@@ -132,7 +136,6 @@
                             </tbody>
                         </table>
                     </div>
-
                     {{ $paginatedCustomers->appends(request()->query())->links() }}
                 </div>
             </div>

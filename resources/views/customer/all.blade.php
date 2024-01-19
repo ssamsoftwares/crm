@@ -81,6 +81,7 @@
                                     'medium' => 'Medium',
                                     'low' => 'Low',
                                     'no required' => 'No required',
+                                    'no status' => 'No Status',
                                 ]" :selected="isset($_REQUEST['customer_status']) ? $_REQUEST['customer_status'] : ''" />
                         </div>
 
@@ -177,7 +178,9 @@
                                                     @if ($cust->user_id != null) checked disabled @endif>
                                             </td>
                                         @endif
-                                        <td>{{ $i++ }}</td>
+
+                                        <td>{{ ($customers->currentPage() - 1) * $customers->perPage() + $loop->index + 1 }}</td>
+
                                         @if (Auth::user()->hasRole('superadmin'))
                                             <td class="text-danger">
                                                 {{ isset($cust->user->name) ? $cust->user->name : 'Not Allot' }}</td>
@@ -253,8 +256,11 @@
 
                                                 <a href="{{ route('customer.customerAllComment', $cust->id) }}"
                                                     class="btn btn-warning btn-sm">Comment</a>
+                                            </div>
 
-
+                                            <div class="mt-2">
+                                                <strong>{{ 'Last Updated' }} :</strong>
+                                                <span>{{ $cust->last_updated }}</span>
                                             </div>
                                         </td>
                                     </tr>
@@ -370,11 +376,11 @@
                     if (comments.length > 0) {
                         comments.forEach(function(comment) {
                             var formattedDate = new Date(comment.created_at).toLocaleDateString(
-                            'en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                            });
+                                'en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                });
 
                             var listItem = $('<li></li>');
                             var commentContainer = $('<div></div>');

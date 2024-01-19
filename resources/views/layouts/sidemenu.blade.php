@@ -2,10 +2,10 @@
 
     <div data-simplebar class="h-100">
         <!-- User details -->
-
         <div class="user-profile text-center mt-3">
             @if (auth()->check())
-                @if (auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('user') || auth()->user()->hasRole('manager'))
+                @if (auth()->user()->hasRole('superadmin') ||
+                        auth()->user()->hasRole('user'))
                     <div class="mt-3">
                         <h4 class="font-size-16 mb-1">Hello {{ ucfirst(request()->user()->name) }}</h4>
                         <span class="text-muted">
@@ -13,13 +13,13 @@
                             {{ ucfirst(request()->user()->role) }}
                         </span>
                     </div>
-                @elseif (session()->has('student_name'))
+                {{-- @elseif (session()->has('student_name'))
                     <div class="mt-3">
                         <h4 class="font-size-16 mb-1">Hello {{ ucfirst(session('student_name')) }}</h4>
                         <span class="text-muted">
 
                         </span>
-                    </div>
+                    </div> --}}
                 @endif
             @endif
         </div>
@@ -35,16 +35,16 @@
                     <li>
                         <a href="{{ route('dashboard') }}" class="waves-effect">
                             <i class="ri-vip-crown-2-line"></i>
-                            <span>Dashboard</span>
+                            <span>{{'Dashboard'}}</span>
                         </a>
                     </li>
 
                     @role('superadmin')
-                        <li class="menu-title">Users</li>
+                        <li class="menu-title">{{'Users'}}</li>
                         <li>
                             <a href="javascript: void(0);" class="has-arrow waves-effect">
                                 <i class="ri-account-circle-line"></i>
-                                <span>User</span>
+                                <span>{{'User'}}</span>
                             </a>
 
                             <ul class="sub-menu" aria-expanded="false">
@@ -58,7 +58,7 @@
                         <li>
                             <a href="javascript: void(0);" class="has-arrow waves-effect">
                                 <i class="ri-account-circle-line"></i>
-                                <span>Customers</span>
+                                <span>{{'Customers'}}</span>
                             </a>
 
                             <ul class="sub-menu" aria-expanded="false">
@@ -71,22 +71,41 @@
                     @endrole
 
                     @role('user')
-                    <li class="menu-title">{{'Customer Details'}}</li>
+                        <li class="menu-title">{{ 'Customer Details' }}</li>
+                        <li>
+                            <a href="{{ route('customers') }}" class="waves-effect">
+                                <i class="ri-vip-crown-2-line"></i>
+                                <span>{{'Customers'}}</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('allotedCustomersFromUser') }}" class="waves-effect">
+                                <i class="ri-vip-crown-2-line"></i>
+                                <span>{{'Customer Report'}}</span>
+                            </a>
+                        </li>
+                    @endrole
+
+                    <li class="menu-title">{{ 'Ongoing Project' }}</li>
                     <li>
-                        <a href="{{route('customers')}}" class="waves-effect">
+                        <a href="{{ route('customer.projectDetailsList') }}" class="waves-effect">
                             <i class="ri-vip-crown-2-line"></i>
-                            <span>Customers</span>
+                            <span>{{'Project Details'}}</span>
+                        </a>
+                    </li>
+
+                    @role('superadmin')
+                    <li class="menu-title">{{ 'User Report' }}</li>
+                    <li>
+                        <a href="{{ route('allUsersReport') }}" class="waves-effect">
+                            <i class="ri-vip-crown-2-line"></i>
+                            <span>Report</span>
                         </a>
                     </li>
                     @endrole
 
-                    <li class="menu-title">{{'Ongoing Project'}}</li>
-                    <li>
-                        <a href="{{route('customer.projectDetailsList')}}" class="waves-effect">
-                            <i class="ri-vip-crown-2-line"></i>
-                            <span>Details</span>
-                        </a>
-                    </li>
+
 
                 @endauth
 

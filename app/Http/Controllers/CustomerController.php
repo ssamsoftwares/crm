@@ -29,6 +29,8 @@ class CustomerController extends Controller
      *---------------------------------------------------------------------
      */
 
+
+
     public function getBulkUploadCustomerData(Request $request)
     {
         $customersQuery = Customer::with('user', 'comments');
@@ -102,11 +104,7 @@ class CustomerController extends Controller
         $perPage = 10;
         $customers = $customersQuery->orderBy('id', 'desc')->paginate($perPage);
 
-        $users = User::where(['status' => 'active'])
-            ->whereHas('roles', function ($query) {
-                $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
-            })->get();
-
+        $users = User::get();
         return [$customers, $users];
     }
 
@@ -117,37 +115,21 @@ class CustomerController extends Controller
         return view('customer.all', compact('customers', 'users'));
     }
 
-    // project details list
-    public function projectDetailsList(Request $request)
-    {
-        [$customers, $users] = $this->getBulkUploadCustomerData($request);
 
-        $filteredCustomers = $customers->filter(function ($customer) {
-            return $customer->project_details !== null;
-        });
 
-        // Paginate
-        $perPage = 10;
-        $currentPage = $request->query('page', 1);
-        $paginatedCustomers = new LengthAwarePaginator(
-            $filteredCustomers->forPage($currentPage, $perPage),
-            $filteredCustomers->count(),
-            $perPage,
-            $currentPage,
-            ['path' => url()->current(), 'query' => $request->query()]
-        );
-
-        return view('project_details.all', compact('paginatedCustomers', 'users'));
-    }
-
+    //Customer Create
     public function create()
     {
-        $users = User::where(['status' => 'active',])->whereHas('roles', function ($query) {
-            $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
-        })->get();
+        // $users = User::where(['status' => 'active',])->whereHas('roles', function ($query) {
+        //     $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
+        // })->get();
+
+        $users = User::get();
         return view('customer.add', compact('users'));
     }
 
+
+    //Customer Store
     public function store(Request $request)
     {
         $this->validate($request, [
@@ -155,13 +137,12 @@ class CustomerController extends Controller
             'email' => 'required|email|unique:customers,email',
             'phone_number' => 'required',
             'company_name' => 'required',
-            'customer_status' => 'required'
         ]);
 
         DB::beginTransaction();
         try {
             $data = $request->all();
-            $data['status'] = $request->customer_status;
+            $data['status'] = isset($request->customer_status) ? $request->customer_status : 'no status';
 
             if (!empty($request->user_id)) {
                 $data['alloted_date'] = Carbon::now();
@@ -175,6 +156,8 @@ class CustomerController extends Controller
         return Redirect::route('customers')->with('status', 'Customer Added Successfully !');
     }
 
+
+    //Customer View Profile
     public function bulkUploadCustomerView(Request $request, $customerId = null)
     {
         $customer = Customer::with(['user', 'comments' => function ($query) use ($request) {
@@ -207,18 +190,20 @@ class CustomerController extends Controller
             abort(404);
         }
 
-        $comments = $customer->comments()->paginate(15);
+        $comments = $customer->comments()->paginate(10);
         return view('customer.view', compact('customer', 'comments'));
     }
 
+
+    //Customer Edit
     public function bulkUploadCustomerEdit(Customer $customer)
     {
-        $users = User::where(['status' => 'active',])->whereHas('roles', function ($query) {
-            $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
-        })->get();
+        $users = User::get();
         return view('customer.edit', compact('customer', 'users'));
     }
 
+
+    //Customer Update
     public function bulkUploadCustomerUpdate(Request $request, Customer $customer)
     {
         $this->validate($request, [
@@ -238,7 +223,7 @@ class CustomerController extends Controller
                 $data['alloted_date']  = Carbon::now();
             }
 
-            $data['status'] = $request->customer_status;
+            $data['status'] = isset($request->customer_status) ? $request->customer_status : 'no status';;
 
             $customer->update($data);
         } catch (Exception $e) {
@@ -250,11 +235,15 @@ class CustomerController extends Controller
         return Redirect::route('customer.bulkUploadCustomerView', ['customerId' => $customer->id])->with('status', 'Customer Updated Successfully!');
     }
 
+
+    //Customer Details Import file
     public function importFileView()
     {
         return view('customer.bulk_upload');
     }
 
+
+    // Customer Import
     public function customerImport(Request $request)
     {
         DB::beginTransaction();
@@ -275,6 +264,8 @@ class CustomerController extends Controller
         return response()->json(['message' => $message]);
     }
 
+
+    //  Download Customer SampleCsv
     public function downloadCustomerSampleCsv()
     {
         DB::beginTransaction();
@@ -289,68 +280,22 @@ class CustomerController extends Controller
         return Redirect::back()->with('status', 'Sample CSV file Not Found.');
     }
 
+
+    // Allot Customer to user (Checkbox)
     public function assignCustomer(Request $request)
     {
         $cId_arr = explode(',', $request->input('c_ids'));
 
-        $customer = Customer::whereIn('id', $cId_arr)->update(['user_id' => $request->input('user_id')]);
+        $customer = Customer::whereIn('id', $cId_arr)
+            ->update([
+                'user_id' => $request->input('user_id'),
+                'alloted_date' =>  Carbon::now()
+            ]);
         return Redirect::route('customers')->with('status', "Customer Successfully Assigned on Selected User.");
     }
 
-    public function projectDetails(Request $request, ProjectDetails $projectDetails)
-    {
-        DB::beginTransaction();
-        try {
-            $data = $request->all();
-            $customer = Customer::find($request->customer_id);
-            // $customer->update(['project_details' => $request->project_details_status]);
-            $customer->update(['project_details' => $request->project_details]);
 
-            if ($request->project_details_status == 'Yes') {
-                ProjectDetails::create([
-                    'user_id' => $request->user_id,
-                    'customer_id' => $request->customer_id,
-                    'project_details_comment' => $request->project_details,
-                ]);
-            }
-        } catch (Exception $e) {
-            DB::rollBack();
-            return Redirect::back()->with('status', $e->getMessage());
-        }
-
-        DB::commit();
-        return Redirect::back()->with('status', "Project Details Added Successfully Done!");
-    }
-
-
-    public function editProjectDetails($projectdetails_id)
-    {
-        $projectDetails = Customer::with('user')
-            ->where('id', $projectdetails_id)
-            ->first();
-        return response()->json(['status' => 200, 'data' => $projectDetails]);
-    }
-
-
-    public function updateProjectDetails(Request $request)
-    {
-        DB::beginTransaction();
-        try {
-            // $projectDetails = ProjectDetails::find($request->id);
-            // $projectDetails->update($request->all());
-            $projectDetails = Customer::find($request->id);
-            $projectDetails->update([
-                'project_details' => $request->project_details,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return Redirect::back()->with('status', $e->getMessage());
-        }
-        DB::commit();
-        return Redirect::back()->with('status', "Project Details Updated Successfully Done!");
-    }
-
-    // add multiple customer name and phone
+    // add multiple customer Name
     public function addcustName(Request $request)
     {
         DB::beginTransaction();
@@ -368,6 +313,8 @@ class CustomerController extends Controller
     }
 
 
+
+    // add multiple customer Phone
     public function addcustNamePhoneNumber(Request $request)
     {
         DB::beginTransaction();
@@ -385,6 +332,7 @@ class CustomerController extends Controller
     }
 
 
+    // get  customer Comment
     public function getCustomerComment($customerId)
     {
         $comments = Comment::where('customer_id', $customerId)->get();

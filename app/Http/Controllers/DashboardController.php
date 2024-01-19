@@ -94,11 +94,7 @@ class DashboardController extends Controller
 
             $total['customerTodayStatus'] = $customerQuery->paginate(10);
         }
-
-        $users = User::where(['status' => 'active'])
-            ->whereHas('roles', function ($query) {
-                $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
-            })->get();
+        $users = User::get();
 
         return view('dashboard', compact('total', 'users'));
     }
