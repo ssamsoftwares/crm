@@ -142,7 +142,7 @@ class CustomerController extends Controller
         DB::beginTransaction();
         try {
             $data = $request->all();
-            $data['status'] = isset($request->customer_status) ? $request->customer_status : 'no status';
+            $data['status'] = isset($request->customer_status) ? $request->customer_status : 'no_status';
 
             if (!empty($request->user_id)) {
                 $data['alloted_date'] = Carbon::now();
@@ -158,41 +158,46 @@ class CustomerController extends Controller
 
 
     //Customer View Profile
+
     public function bulkUploadCustomerView(Request $request, $customerId = null)
     {
-        $customer = Customer::with(['user', 'comments' => function ($query) use ($request) {
-            $query->orderBy('id', 'desc');
-            // Search by created_at in comments relation
-            $search = $request->search;
-            if (!empty($search)) {
-                if (Carbon::hasFormat($search, 'd-M-Y')) {
-                    $formattedDate = Carbon::createFromFormat('d-M-Y', $search)->format('Y-m-d');
-                    $query->whereDate('created_at', $formattedDate);
-                } else {
-                    $query->where(function ($subquery) use ($search) {
-                        $subquery->where('comments.comments', 'like', '%' . $search . '%')
-                            ->orWhereHas('user', function ($userQuery) use ($search) {
-                                $userQuery->where('name', 'like', '%' . $search . '%');
-                            })
-                            ->orWhereHas('customer', function ($customerQuery) use ($search) {
-                                $customerQuery->where('name', 'like', '%' . $search . '%')
-                                    ->orWhere('company_name', 'like', '%' . $search . '%');
-                            });
-                    });
-                }
-            }
-        }])
-            // ->where('user_id', auth()->user()->id)
-            ->where('id', $customerId)
-            ->first();
+        $customer = Customer::with(['user'])->where('id', $customerId)->first();
 
         if (!$customer) {
             abort(404);
         }
 
-        $comments = $customer->comments()->paginate(10);
+        $commentsQuery = Comment::where('customer_id', $customerId)->orderBy('id', 'desc');
+
+
+        $search = $request->search;
+
+        if (!empty($search)) {
+            $commentsQuery->where(function ($subquery) use ($search) {
+                if (Carbon::hasFormat($search, 'd-M-Y')) {
+
+                    $formattedDate = Carbon::createFromFormat('d-M-Y', $search)->format('Y-m-d');
+                    $subquery->whereDate('created_at', $formattedDate);
+                } else {
+
+                    $subquery->where('comments', 'like', '%' . $search . '%')
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('name', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('customer', function ($customerQuery) use ($search) {
+                            $customerQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('company_name', 'like', '%' . $search . '%');
+                        });
+                }
+            });
+        }
+
+
+        $comments = $commentsQuery->paginate(10);
+
         return view('customer.view', compact('customer', 'comments'));
     }
+
 
 
     //Customer Edit
@@ -223,7 +228,7 @@ class CustomerController extends Controller
                 $data['alloted_date']  = Carbon::now();
             }
 
-            $data['status'] = isset($request->customer_status) ? $request->customer_status : 'no status';;
+            $data['status'] = isset($request->customer_status) ? $request->customer_status : 'no_status';;
 
             $customer->update($data);
         } catch (Exception $e) {

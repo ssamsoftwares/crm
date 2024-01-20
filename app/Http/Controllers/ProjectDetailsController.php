@@ -59,7 +59,8 @@ class ProjectDetailsController extends Controller
                     ->orWhere('phone_number', 'like', '%' . $search . '%')
                     ->orWhere('status', 'like', '%' . $search . '%')
                     ->orWhere('communication_medium', 'like', '%' . $search . '%')
-                    ->orWhere('company_name', 'like', '%' . $search . '%');
+                    ->orWhere('company_name', 'like', '%' . $search . '%')
+                    ->orWhere('project_details', 'like', '%' . $search . '%');
             });
         });
 

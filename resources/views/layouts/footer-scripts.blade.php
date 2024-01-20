@@ -52,4 +52,8 @@
 <!-- init js -->
 <script src="{{asset('assets/js/pages/form-editor.init.js')}}"></script>
 
+<!-- select2 js -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 @stack('script')

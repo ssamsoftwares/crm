@@ -27,7 +27,7 @@ class CustomerImport  implements ToModel, WithHeadingRow
             'email' => isset($row['email']) ? trim($row['email']) : null,
             'phone_number' => isset($row['phone_number']) ? trim($row['phone_number']) : null,
             'company_name' => isset($row['company_name']) ? trim($row['company_name']) : null,
-            'status' => isset($row['status']) ? strtolower(trim($row['status'])) : 'no status',
+            'status' => isset($row['status']) ? strtolower(trim($row['status'])) : 'no_status',
             'communication_medium' => isset($row['communication_medium']) ? strtolower(trim($row['communication_medium'])) : null,
 
         ];

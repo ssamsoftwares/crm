@@ -8,6 +8,7 @@ use App\Http\Controllers\ProjectDetailsController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -27,8 +28,9 @@ use Illuminate\Support\Facades\URL;
 
 if (env('APP_ENV') === 'production') {
     //URL::forceSchema('https');
-    URL::forceScheme('https');
+   \URL::forceScheme('https');
 }
+
 
 Route::get('/', function () {
     return Redirect::route('login');
@@ -114,6 +116,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('user-alloted-cust-status/{status?}', [ReportController::class, 'statusWiseShowCustomerList'])->name('statusWiseShowCustomerList');
 });
+
+// Update Customer update query
+
+    Route::get('/customer-status-update-query', function () {
+        // Update customers where status is NULL to 'no_status'
+        Customer::whereNull('status')->update(['status' => 'no_status']);
+        // Update customers where status is 'no required' to 'no_required'
+        Customer::where('status', 'no required')->update(['status' => 'no_required']);
+        return "Customer Status updated successfully done!";
+    });
+
+
+
+
+
 
 
 require __DIR__ . '/auth.php';

@@ -17,12 +17,12 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id'=> 3,
+            'user_id'=> 1,
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'phone_number' => fake()->numerify('##########'),
             'company_name'=> fake()->company(),
-            'status'=> 'no status',
+            'status'=> Null,
             'communication_medium'=> 'phone',
             'alloted_date' => fake()->date(),
             'project_details'=> fake()->sentence()

@@ -21,10 +21,11 @@
             <div class="card">
                 <div class="justify-content-end d-flex">
                     <x-search.table-search action="{{ route('users.index') }}" method="get" name="search"
-                        value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" btnClass="search_btn" />
+                        value="{{$search}}" btnClass="search_btn" />
                     </div>
 
                 <div class="card-body">
+                    <div class="table-responsive">
                     <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap"
                         style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead>
@@ -74,6 +75,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                     {{ $data->appends(request()->query())->links() }}
                 </div>
             </div>

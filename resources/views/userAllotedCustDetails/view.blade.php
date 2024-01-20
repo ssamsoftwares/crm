@@ -10,41 +10,7 @@
 
 @section('content')
     @push('style')
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        <style>
-            .ri-eye-line:before {
-                content: "\ec95";
-                position: absolute;
-                left: 13px;
-                top: 5px;
-            }
 
-            a.btn.btn-primary.waves-effect.waves-light.view {
-                width: 41px;
-                height: 32px;
-            }
-
-            .action-btns.text-center {
-                display: flex;
-                gap: 10px;
-            }
-
-            .ri-pencil-line:before {
-                content: "\ef8c";
-                position: absolute;
-                left: 13px;
-                top: 5px;
-            }
-
-            a.btn.btn-info.waves-effect.waves-light.edit {
-                width: 41px;
-                height: 32px;
-            }
-
-            table.dataTable>tbody>tr.child ul.dtr-details>li {
-                white-space: nowrap !important;
-            }
-        </style>
     @endpush
 
     <x-status-message />
@@ -65,10 +31,26 @@
                 </div>
 
                 <!-- Search Filter -->
-                <div class="justify-content-end d-flex">
-                    <x-search.table-search action="{{route('statusWiseShowCustomerList')}}" method="get" name="search"
-                        value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" btnClass="search_btn" />
-                </div>
+
+                <form action="{{ route('statusWiseShowCustomerList', ['status' => $status, 'search' => $search]) }}"
+                    method="get">
+                    <div class="row m-2">
+                        <div class="col-lg-5">
+                        </div>
+                        <div class="col-lg-5">
+                            <x-form.input name="search" label="" type="search" placeholder="Search....."
+                                value="{{ $search }}" />
+                        </div>
+
+                        <div class="col-lg-2 mt-lg-4">
+                            <input type="submit" class="btn btn-primary " value="Search">
+                            <a href="{{ route('statusWiseShowCustomerList', ['status' => $status]) }}"
+                                class="btn btn-secondary">Reset</a>
+                        </div>
+
+                    </div>
+                </form>
+
 
                 <div class="card-body">
                     <div class="table-responsive">
@@ -120,6 +102,5 @@
 @endsection
 
 @push('script')
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+   
 @endpush

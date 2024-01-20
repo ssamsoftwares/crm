@@ -7,22 +7,23 @@ use App\Models\User;
 use Exception;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Arr;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\View as FacadesView;
+use View;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $data = User::orderBy('id', 'DESC');
-
+        $search = $request->input('search');
         if ($request->has('search')) {
-            $search = $request->input('search');
             $data->where(function ($subquery) use ($search) {
                 $subquery->where('name', 'like', '%' . $search . '%')
                     ->orWhere('email', 'like', $search . '%')
@@ -33,16 +34,14 @@ class UserController extends Controller
         }
 
         $data = $data->paginate(10);
-
-        return view('user.all', compact('data'))
-            ->with('i', ($request->input('page', 1) - 1) * 10);
+        return view('user.all',compact('data','search'));
     }
 
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): View
+    public function create()
     {
         // $roles = Role::pluck('name', 'name')->all();
         $roles = Role::whereNotIn('name', ['superadmin'])->pluck('name', 'name')->all();
@@ -73,11 +72,11 @@ class UserController extends Controller
 
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('status', $e->getMessage());
+            return Redirect::back()->with('status', $e->getMessage());
         }
 
         DB::commit();
-        return redirect()->route('users.index')->with('status', 'User created successfully');
+        return Redirect::route('users.index')->with('status', 'User created successfully');
     }
 
 
@@ -85,7 +84,7 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id): View
+    public function show($id)
     {
         $user = User::find($id);
 
@@ -95,7 +94,7 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id): View
+    public function edit($id)
     {
         $user = User::find($id);
         // $roles = Role::pluck('name', 'name')->all();
@@ -136,11 +135,11 @@ class UserController extends Controller
             $user->assignRole($request->roles);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('status', $e->getMessage());
+            return Redirect::back()->with('status', $e->getMessage());
         }
 
         DB::commit();
-        return redirect()->route('users.index')->with('status', 'User updated successfully');
+        return Redirect::route('users.index')->with('status', 'User updated successfully');
     }
 
 
@@ -150,7 +149,7 @@ class UserController extends Controller
             $userBlock = User::find($id);
             $userBlock->status = $userBlock->status == 'active' ? 'block' : 'active';
             $userBlock->update();
-            return redirect()->back()->with('status',  $userBlock->name . ' User status has been updated.');
+            return Redirect::back()->with('status',  $userBlock->name . ' User status has been updated.');
         }
 
 
@@ -164,9 +163,9 @@ class UserController extends Controller
             User::find($id)->delete();
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('status', $e->getMessage());
+            return Redirect::back()->with('status', $e->getMessage());
         }
         DB::commit();
-        return redirect()->route('users.index')->with('status', 'User deleted successfully');
+        return Redirect::route('users.index')->with('status', 'User deleted successfully');
     }
 }

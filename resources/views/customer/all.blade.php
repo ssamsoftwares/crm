@@ -10,41 +10,7 @@
 
 @section('content')
     @push('style')
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        <style>
-            .ri-eye-line:before {
-                content: "\ec95";
-                position: absolute;
-                left: 13px;
-                top: 5px;
-            }
-
-            a.btn.btn-primary.waves-effect.waves-light.view {
-                width: 41px;
-                height: 32px;
-            }
-
-            .action-btns.text-center {
-                display: flex;
-                gap: 10px;
-            }
-
-            .ri-pencil-line:before {
-                content: "\ef8c";
-                position: absolute;
-                left: 13px;
-                top: 5px;
-            }
-
-            a.btn.btn-info.waves-effect.waves-light.edit {
-                width: 41px;
-                height: 32px;
-            }
-
-            table.dataTable>tbody>tr.child ul.dtr-details>li {
-                white-space: nowrap !important;
-            }
-        </style>
+      
     @endpush
 
     <x-status-message />
@@ -74,35 +40,22 @@
                         @endif
 
                         <div class="col-lg-3">
+                            @php
+                                $customerStatus = config('constant.customer_status');
+                            @endphp
                             <x-form.select label="Status" chooseFileComment="All" name="customer_status"
-                                id="customer_status" :options="[
-                                    'today' => 'Today',
-                                    'high' => 'High',
-                                    'medium' => 'Medium',
-                                    'low' => 'Low',
-                                    'no required' => 'No required',
-                                    'no status' => 'No Status',
-                                ]" :selected="isset($_REQUEST['customer_status']) ? $_REQUEST['customer_status'] : ''" />
+                                id="customer_status" :options="$customerStatus" :selected="isset($_REQUEST['customer_status']) ? $_REQUEST['customer_status'] : ''" />
                         </div>
 
-                        {{-- <div class="col-lg-3">
-                            <x-form.select label="Communication Medium" chooseFileComment="All" name="communication_medium"
-                                id="communication_medium" :options="[
-                                    'phone' => 'Phone',
-                                    'skype' => 'Skype',
-                                    'whatsApp' => 'WhatsApp',
-                                ]" :selected="isset($_REQUEST['communication_medium'])
-                                    ? $_REQUEST['communication_medium']
-                                    : ''" />
-                        </div> --}}
 
                         <div class="col-lg-3">
                             <x-form.input name="search" label="Search" type="text" placeholder="Search....."
                                 value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" />
                         </div>
 
-                        <div class="col-lg-1">
-                            <input type="submit" class="btn btn-primary mt-lg-4" value="Filter">
+                        <div class="col-lg-2 mt-lg-4">
+                            <input type="submit" class="btn btn-primary" value="Filter">
+                            <a href="{{route('customers')}}" class="btn btn-secondary">Reset</a>
                         </div>
 
                     </div>
@@ -159,7 +112,6 @@
                                     <th>{{ 'Company Name' }}</th>
                                     <th>{{ 'Fast Follow Up' }}</th>
                                     <th>{{ 'Comments' }}</th>
-                                    {{-- <th> {{ 'Communication' }}<br> {{ 'Medium' }}</th> --}}
                                     <th>{{ 'Status' }}</th>
                                     <th>{{ 'Actions' }}</th>
                                 </tr>
@@ -209,22 +161,6 @@
                                                 onclick="viewCustomerComment(<?= $cust->id ?>)">View Comment</a>
                                         </td>
 
-                                        {{-- <td>
-                                            <select class="form-select communication-medium"
-                                                data-custmedium-id="{{ $cust->id }}">
-                                                <option value="" disabled selected>--Select medium--</option>
-                                                <option value="phone"
-                                                    {{ $cust->communication_medium == 'phone' ? 'selected' : '' }}>
-                                                    Phone</option>
-                                                <option value="skype"
-                                                    {{ $cust->communication_medium == 'skype' ? 'selected' : '' }}>
-                                                    Skype</option>
-
-                                                <option value="whatsApp"
-                                                    {{ $cust->communication_medium == 'whatsApp' ? 'selected' : '' }}>
-                                                    WhatsApp</option>
-                                            </select>
-                                        </td> --}}
 
                                         <td>
                                             <select class="form-select customer-status"
@@ -241,8 +177,8 @@
                                                 <option value="low" {{ $cust->status == 'low' ? 'selected' : '' }}>
                                                     Low</option>
 
-                                                <option value="no required"
-                                                    {{ $cust->status == 'no required' ? 'selected' : '' }}>
+                                                <option value="no_required"
+                                                    {{ $cust->status == 'no_required' ? 'selected' : '' }}>
                                                     No required</option>
                                             </select>
                                         </td>
@@ -259,7 +195,7 @@
                                             </div>
 
                                             <div class="mt-2">
-                                                <strong>{{ 'Last Updated' }} :</strong>
+                                                {{-- <strong>{{ 'Last Updated' }} :</strong> --}}
                                                 <span>{{ $cust->last_updated }}</span>
                                             </div>
                                         </td>
@@ -295,73 +231,8 @@
 @endsection
 
 @push('script')
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     {{-- View Customer Comment --}}
-    {{-- <script>
-        function viewCustomerComment(customerId) {
-            $.ajax({
-                url: '/getCustomerComment/' + customerId,
-                type: 'GET',
-                success: function(response) {
-                    var comments = response.comments;
-                    var commentList = $('#commentList');
-                    commentList.empty();
-
-                    if (comments.length > 0) {
-                        comments.forEach(function(comment) {
-                            commentList.append('<li>' + comment.comments + '</li>');
-                        });
-                    } else {
-                        commentList.append('<strong>No comments available.</strong>');
-                    }
-                    // Show the modal
-                    $('#commentViewModel').modal('show');
-                },
-                error: function(error) {
-                    console.log(error);
-                }
-            });
-        }
-    </script> --}}
-
-    {{--
-    <script>
-        function viewCustomerComment(customerId) {
-            $.ajax({
-                url: '/getCustomerComment/' + customerId,
-                type: 'GET',
-                success: function(response) {
-                    var comments = response.comments;
-                    var commentList = $('#commentList');
-                    commentList.empty();
-
-                    if (comments.length > 0) {
-                        comments.forEach(function(comment) {
-                            var formattedDate = new Date(comment.created_at).toLocaleDateString(
-                            'en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                            });
-
-                            var listItem = $('<li></li>');
-                            listItem.append('<strong>' + comment.comments + ' - ' + formattedDate + '</strong>');
-                            commentList.append(listItem);
-                        });
-                    } else {
-                        commentList.append('<strong>No comments available.</strong>');
-                    }
-
-                    // Show the modal
-                    $('#commentViewModel').modal('show');
-                },
-                error: function(error) {
-                    console.log(error);
-                }
-            });
-        }
-    </script> --}}
 
     <script>
         function viewCustomerComment(customerId) {
@@ -406,8 +277,6 @@
             });
         }
     </script>
-
-
 
     {{-- Allot multiple customer to user --}}
     <script>

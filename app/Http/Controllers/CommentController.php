@@ -131,37 +131,36 @@ class CommentController extends Controller
 
     public function customerAllComment(Request $request, $customerId = null)
     {
-        $customer = Customer::with(['user', 'comments' => function ($query) use ($request) {
-            $query->orderBy('id', 'desc');
-
-            $search = $request->search;
-
-            if (!empty($search)) {
-                if (Carbon::hasFormat($search, 'd-M-Y')) {
-                    $formattedDate = Carbon::createFromFormat('d-M-Y', $search)->format('Y-m-d');
-                    $query->whereDate('created_at', $formattedDate);
-                } else {
-                    $query->where(function ($subquery) use ($search) {
-                        $subquery->where('comments.comments', 'like', '%' . $search . '%')
-                            ->orWhereHas('user', function ($userQuery) use ($search) {
-                                $userQuery->where('name', 'like', '%' . $search . '%');
-                            })
-                            ->orWhereHas('customer', function ($customerQuery) use ($search) {
-                                $customerQuery->where('name', 'like', '%' . $search . '%')
-                                    ->orWhere('company_name', 'like', '%' . $search . '%');
-                            });
-                    });
-                }
-            }
-        }])
-            ->where('id', $customerId)
-            ->first();
+        $customer = Customer::with(['user'])->where('id', $customerId)->first();
 
         if (!$customer) {
             abort(404);
         }
 
-        $comments = $customer->comments()->paginate(10);
+        $commentsQuery = $customer->comments()->orderBy('id', 'desc');
+
+        $search = $request->search;
+
+        if (!empty($search)) {
+            if (Carbon::hasFormat($search, 'd-M-Y')) {
+                $formattedDate = Carbon::createFromFormat('d-M-Y', $search)->format('Y-m-d');
+                $commentsQuery->whereDate('created_at', $formattedDate);
+            } else {
+                $commentsQuery->where(function ($subquery) use ($search) {
+                    $subquery->where('comments', 'like', '%' . $search . '%')
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('name', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('customer', function ($customerQuery) use ($search) {
+                            $customerQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('company_name', 'like', '%' . $search . '%');
+                        });
+                });
+            }
+        }
+
+        $comments = $commentsQuery->paginate(10);
+
         return view('comment.index', compact('customer', 'comments'));
     }
 

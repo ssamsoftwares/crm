@@ -93,11 +93,11 @@
                     </div>
 
                     <div class="col-md-4">
-                        <div class="col-lg-12">
+
                             <x-search.table-search action="{{ route('customer.customerAllComment', $customer->id) }}"
                                 method="get" name="search"
                                 value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" btnClass="search_btn" />
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -116,9 +116,6 @@
                             </thead>
 
                             <tbody>
-                                @php
-                                $i = 1; @endphp
-                                {{-- @foreach ($customer->comments as $com) --}}
                                 @foreach ($comments as $com)
                                     <tr>
                                         <td>{{ ($comments->perPage() * ($comments->currentPage() - 1)) + $loop->index + 1 }}</td>

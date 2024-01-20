@@ -7,24 +7,48 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
 
     // Superadmin Show all User Report List
-    public function allUsersReport()
+
+    public function allUsersReport(Request $request)
     {
-        $usersWithCustomerCount  = User::withCount('customer')->paginate(10);
-        return view('report.all_user_report', compact('usersWithCustomerCount'));
+
+        $query = User::withCount('customer');
+        $search = $request->user;
+        if (!empty($request->user)) {
+            $query->where('id', $search);
+        }
+
+        $usersWithCustomerCount = $query->paginate(10);
+        $users = User::get();
+
+        return view('report.all_user_report', compact('usersWithCustomerCount','users'));
     }
 
 
     // View Customer List
-    public function userAllotedCustomerDetails($userId)
+    public function userAllotedCustomerDetails(Request $request,$userId=Null)
     {
         $user = User::findOrFail($userId);
-        $customers = Customer::where('user_id', $userId)->paginate(10);
-        return view('report.view_cust_details', compact('customers', 'user'));
+        $query = Customer::where('user_id', $userId);
+
+        $search = $request->search;
+        if(!empty($search)){
+            $query->where(function ($subquery) use ($search){
+                $subquery->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('company_name', 'like', '%' . $search . '%')
+                    ->orWhere('phone_number', 'like', '%' . $search . '%')
+                    ->orWhere('status', 'like', '%' . $search . '%');
+            });
+        }
+
+        $customers = $query->paginate(10);
+
+        return view('report.view_cust_details', compact('customers', 'user','search'));
     }
 
 
@@ -37,10 +61,10 @@ class ReportController extends Controller
         $total['customerHighStatusCount'] = Customer::where('status', 'high')->where('user_id', Auth::id())->count();
         $total['customerMediumStatusCount'] = Customer::where('status', 'medium')->where('user_id', Auth::id())->count();
         $total['customerLowStatusCount'] = Customer::where('status', 'low')->where('user_id', Auth::id())->count();
-        $total['customerNoReqStatusCount'] = Customer::where('status', 'no required')->where('user_id', Auth::id())->count();
+        $total['customerNoReqStatusCount'] = Customer::where('status', 'no_required')->where('user_id', Auth::id())->count();
         // $total['customerNoStatusCount'] = Customer::whereNull('status')->where('user_id', Auth::id())->count();
         $total['customerNoStatusCount'] = Customer::where(function ($query) {
-            $query->where('status', 'no status')
+            $query->where('status', 'no_status')
                 ->orWhereNull('status');
         })
             ->where('user_id', Auth::id())
@@ -49,35 +73,15 @@ class ReportController extends Controller
         return view('userAllotedCustDetails.all', compact('total'));
     }
 
-    // public function statusWiseShowCustomerList(Request $request, $status=Null)
-    // {
-    //     $query = Customer::where('status', $status)->where('user_id', Auth::id())->get();
-    //     $search = $request->search;
-    //     if(!empty($request->search)){
-    //         $query->where(function ($subquery) use($search){
-    //             $subquery->where('name', 'like', '%' . $search . '%')
-    //             ->orWhere('comapny_name', 'like', '%' . $search . '%')
-    //             ->orWhere('phone_number', 'like', '%' . $search . '%')
-    //             ->orWhere('status', 'like', '%' . $search . '%');
-    //         });
-
-    //     }
-
-    //     $customers = $query->paginate(10);
-    //     return view('userAllotedCustDetails.view', ['customers' => $customers]);
-    // }
-
 
     public function statusWiseShowCustomerList(Request $request, $status = null)
     {
         $query = Customer::where('user_id', Auth::id());
-
-        // Add a condition for the status if provided
         if (!is_null($status)) {
             $query->where('status', $status);
         }
 
-        $search = $request->search;
+        $search = $request->input('search');
         if (!empty($search)) {
             $query->where(function ($subquery) use ($search) {
                 $subquery->where('name', 'like', '%' . $search . '%')
@@ -88,10 +92,6 @@ class ReportController extends Controller
         }
 
         $customers = $query->paginate(10);
-
-        // Pass the status parameter to the view
-        return view('userAllotedCustDetails.view', compact('customers', 'status'));
+        return view('userAllotedCustDetails.view', compact('customers', 'status', 'search'));
     }
-
-
 }

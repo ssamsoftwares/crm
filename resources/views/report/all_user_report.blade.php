@@ -10,41 +10,7 @@
 
 @section('content')
     @push('style')
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        <style>
-            .ri-eye-line:before {
-                content: "\ec95";
-                position: absolute;
-                left: 13px;
-                top: 5px;
-            }
 
-            a.btn.btn-primary.waves-effect.waves-light.view {
-                width: 41px;
-                height: 32px;
-            }
-
-            .action-btns.text-center {
-                display: flex;
-                gap: 10px;
-            }
-
-            .ri-pencil-line:before {
-                content: "\ef8c";
-                position: absolute;
-                left: 13px;
-                top: 5px;
-            }
-
-            a.btn.btn-info.waves-effect.waves-light.edit {
-                width: 41px;
-                height: 32px;
-            }
-
-            table.dataTable>tbody>tr.child ul.dtr-details>li {
-                white-space: nowrap !important;
-            }
-        </style>
     @endpush
 
     <x-status-message />
@@ -52,31 +18,28 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="card">
-                {{-- <form action="" method="get">
+                <form action="{{route('allUsersReport')}}" method="get">
                     <div class="row m-2">
-
                             <div class="col-lg-3">
                                 <label for="">Alloted User</label>
                                 <select name="user" id="" class="form-control selectUsers">
                                     <option value="">All</option>
-                                    <option value="-1"
-                                        {{ isset($_REQUEST['user']) && $_REQUEST['user'] == -1 ? 'selected' : '' }}>Not
-                                        Allot</option>
-                                    @foreach ($usersWithCustomerCount as $u)
-                                        <option value="{{ $u->id }}"
-                                            {{ isset($_REQUEST['user']) && $_REQUEST['user'] == $u->id ? 'selected' : '' }}>
-                                            {{ $u->name }}
-                                        </option>
+                                    @foreach ($users as $u)
+                                    <option value="{{ $u->id }}" {{ isset($_REQUEST['user']) && $_REQUEST['user'] == $u->id ? 'selected' : '' }}>
+                                        {{ $u->name }}
+                                    </option>
+
                                     @endforeach
                                 </select>
                             </div>
 
-                        <div class="col-lg-1 mt-1">
-                            <input type="submit" class="btn btn-primary mt-lg-4" value="Filter">
+                        <div class="col-lg-2 mt-lg-4 btn-sm">
+                            <input type="submit" class="btn btn-primary" value="Filter">
+                            <a href="{{route('allUsersReport')}}" class="btn btn-secondary">Reset</a>
                         </div>
 
                     </div>
-                </form> --}}
+                </form>
 
 
                 <div class="card-body">
@@ -85,7 +48,7 @@
                             style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                             <thead>
                                 <tr>
-                                    <th>{{ '#' }}</th>
+                                    {{-- <th>{{ '#' }}</th> --}}
                                     <th>{{ 'User Name' }}</th>
                                     <th>{{ 'User Email' }}</th>
                                     <th>{{ 'No. of Alloted customer count' }}</th>
@@ -131,10 +94,10 @@
 @endsection
 
 @push('script')
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-
-
-
+<script>
+    $(document).ready(function () {
+        $('.selectUsers').select2();
+    });
+</script>
 @endpush
