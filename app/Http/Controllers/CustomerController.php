@@ -32,7 +32,6 @@ class CustomerController extends Controller
 
     public function getBulkUploadCustomerData(Request $request)
     {
-
         $customersQuery = Customer::with('user', 'comments');
         $authUser = Auth::user();
 
@@ -63,8 +62,14 @@ class CustomerController extends Controller
                 $query->where('communication_medium', $request->communication_medium);
             }
 
-            if (!empty($request->date)) {
-                $query->whereDate('created_at', $request->date);
+            //   Date filter
+            if (!empty($request->from_date) && !empty($request->to_date)) {
+                $from_date = $this->validateAndParseDate($request->from_date);
+                $to_date = $this->validateAndParseDate($request->to_date);
+
+                if ($from_date && $to_date) {
+                    $query->whereBetween('created_at', [$from_date->startOfDay(), $to_date->endOfDay()]);
+                }
             }
 
             // "Not Allot" user
@@ -101,16 +106,36 @@ class CustomerController extends Controller
                 $query->where('communication_medium', $request->communication_medium);
             }
 
-            if (!empty($request->date)) {
-                $query->whereDate('created_at', $request->date);
+               //   Date filter
+               if (!empty($request->from_date) && !empty($request->to_date)) {
+                $from_date = $this->validateAndParseDate($request->from_date);
+                $to_date = $this->validateAndParseDate($request->to_date);
+
+                if ($from_date && $to_date) {
+                    $query->whereBetween('created_at', [$from_date->startOfDay(), $to_date->endOfDay()]);
+                }
             }
+
         });
 
-        $perPage = 10;
+        $perPage = $request->input('pagination', 10);
         $customers = $customersQuery->orderBy('id', 'desc')->paginate($perPage);
 
         $users = User::get();
         return [$customers, $users];
+    }
+
+
+
+
+
+    private function validateAndParseDate($date)
+    {
+        try {
+            return Carbon::parse($date);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     // customer list
