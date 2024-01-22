@@ -30,9 +30,9 @@ class CustomerController extends Controller
      */
 
 
-
     public function getBulkUploadCustomerData(Request $request)
     {
+
         $customersQuery = Customer::with('user', 'comments');
         $authUser = Auth::user();
 
@@ -52,16 +52,19 @@ class CustomerController extends Controller
                     ->orWhere('project_details', 'like', '%' . $search . '%');
             });
 
-            $status = $request->customer_status;
-            $communication_medium = $request->communication_medium;
+
             $selectedUser = $request->input('user');
 
-            if (!empty($status)) {
-                $query->where('status', $status);
+            if (!empty($request->customer_status)) {
+                $query->where('status', $request->customer_status);
             }
 
-            if (!empty($communication_medium)) {
-                $query->where('communication_medium', $communication_medium);
+            if (!empty($request->communication_medium)) {
+                $query->where('communication_medium', $request->communication_medium);
+            }
+
+            if (!empty($request->date)) {
+                $query->whereDate('created_at', $request->date);
             }
 
             // "Not Allot" user
@@ -89,15 +92,17 @@ class CustomerController extends Controller
                     ->orWhere('company_name', 'like', '%' . $search . '%');
             });
 
-            $status = $request->customer_status;
-            $communication_medium = $request->communication_medium;
 
-            if (!empty($status)) {
-                $query->where('status', $status);
+            if (!empty($request->customer_status)) {
+                $query->where('status', $request->customer_status);
             }
 
-            if (!empty($communication_medium)) {
-                $query->where('communication_medium', $communication_medium);
+            if (!empty($request->communication_medium)) {
+                $query->where('communication_medium', $request->communication_medium);
+            }
+
+            if (!empty($request->date)) {
+                $query->whereDate('created_at', $request->date);
             }
         });
 
@@ -120,10 +125,6 @@ class CustomerController extends Controller
     //Customer Create
     public function create()
     {
-        // $users = User::where(['status' => 'active',])->whereHas('roles', function ($query) {
-        //     $query->where('name', 'user')->whereNotIn('name', ['superadmin']);
-        // })->get();
-
         $users = User::get();
         return view('customer.add', compact('users'));
     }

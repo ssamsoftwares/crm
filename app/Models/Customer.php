@@ -27,6 +27,7 @@ class Customer extends Model
         'updated_at' => 'datetime',
     ];
 
+
     // Accessor for the last_updated (updated_at) attribute
 
     public function getLastUpdatedAttribute()
@@ -41,4 +42,13 @@ class Customer extends Model
             return $this->updated_at->format('d-M-Y h:i a');
         }
     }
+
+
+    public function getCreatedAtAttribute($value)
+    {
+        return \Carbon\Carbon::parse($value)->format('d-M-Y');
+    }
+
+
+
 }

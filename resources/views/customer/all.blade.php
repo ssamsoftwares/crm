@@ -10,7 +10,7 @@
 
 @section('content')
     @push('style')
-      
+
     @endpush
 
     <x-status-message />
@@ -39,7 +39,7 @@
                             </div>
                         @endif
 
-                        <div class="col-lg-3">
+                        <div class="col-lg-2">
                             @php
                                 $customerStatus = config('constant.customer_status');
                             @endphp
@@ -51,6 +51,11 @@
                         <div class="col-lg-3">
                             <x-form.input name="search" label="Search" type="text" placeholder="Search....."
                                 value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" />
+                        </div>
+
+                        <div class="col-lg-2">
+                            <x-form.input name="date" label="Date" type="date"
+                                value="{{ isset($_REQUEST['date']) ? $_REQUEST['date'] : '' }}" />
                         </div>
 
                         <div class="col-lg-2 mt-lg-4">
@@ -107,6 +112,7 @@
                                     @if (Auth::user()->hasRole('superadmin'))
                                         <th>{{ 'Allot User' }}</th>
                                     @endif
+                                    <th>{{'Date'}}</th>
                                     <th>{{ 'Name' }}</th>
                                     <th>{{ 'Phone' }}</th>
                                     <th>{{ 'Company Name' }}</th>
@@ -137,6 +143,7 @@
                                             <td class="text-danger">
                                                 {{ isset($cust->user->name) ? $cust->user->name : 'Not Allot' }}</td>
                                         @endif
+                                        <td>{{ $cust->created_at }}</td>
                                         <td>{{ $cust->name }}</td>
 
                                         <td>{{ $cust->phone_number }}</td>

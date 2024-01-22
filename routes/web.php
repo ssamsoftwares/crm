@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\URL;
 
 if (env('APP_ENV') === 'production') {
     //URL::forceSchema('https');
-   \URL::forceScheme('https');
+    \URL::forceScheme('https');
 }
 
 
@@ -119,13 +119,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // Update Customer update query
 
-    Route::get('/customer-status-update-query', function () {
-        // Update customers where status is NULL to 'no_status'
-        Customer::whereNull('status')->update(['status' => 'no_status']);
-        // Update customers where status is 'no required' to 'no_required'
-        Customer::where('status', 'no required')->update(['status' => 'no_required']);
-        return "Customer Status updated successfully done!";
-    });
+Route::get('/customer-status-update-query', function () {
+    // Update customers where status is NULL to 'no_status'
+    Customer::whereNull('status')->update(['status' => 'no_status']);
+    // Update customers where status is 'no required' to 'no_required'
+    Customer::where('status', 'no required')->update(['status' => 'no_required']);
+    return "Customer Status updated successfully done!";
+});
 
 
 
