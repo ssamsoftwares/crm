@@ -46,6 +46,16 @@
                     <hr>
 
                     <h5 class="card-title">
+                        <span>Status :</span>
+                        @if ($user->status == 'active')
+                        <b class="btn btn-primary">{{'Active'}}</b>
+                        @else
+                        <b class="btn btn-danger">{{'Block'}}</b>
+                        @endif
+                    </h5>
+                    <hr>
+
+                    <h5 class="card-title">
                         <span>Role :</span>
                             @if (!empty($user->getRoleNames()))
                                 @foreach ($user->getRoleNames() as $v)

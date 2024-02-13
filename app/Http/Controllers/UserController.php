@@ -34,7 +34,7 @@ class UserController extends Controller
         }
 
         $data = $data->paginate(10);
-        return view('user.all',compact('data','search'));
+        return view('user.all', compact('data', 'search'));
     }
 
 
@@ -63,6 +63,9 @@ class UserController extends Controller
 
         try {
             $input = $request->all();
+
+            $input['status'] = $request->customer_status;
+
             $input['normal_password'] = $request->password;
             $input['password'] = Hash::make($input['password']);
             $user = User::create($input);
@@ -119,12 +122,15 @@ class UserController extends Controller
         DB::beginTransaction();
 
         try {
+        
             $input = $request->all();
+
+            $input['status'] = $request->customer_status;
 
             if (!empty($input['password'])) {
                 $input['normal_password'] = $request->password;
                 $input['password'] = Hash::make($input['password']);
-            }else {
+            } else {
                 $input = Arr::except($input, array('password'));
             }
 
@@ -143,14 +149,14 @@ class UserController extends Controller
     }
 
 
-        // User status change
-        public function userStatusUpdate($id)
-        {
-            $userBlock = User::find($id);
-            $userBlock->status = $userBlock->status == 'active' ? 'block' : 'active';
-            $userBlock->update();
-            return Redirect::back()->with('status',  $userBlock->name . ' User status has been updated.');
-        }
+    // User status change
+    public function userStatusUpdate($id)
+    {
+        $userBlock = User::find($id);
+        $userBlock->status = $userBlock->status == 'active' ? 'block' : 'active';
+        $userBlock->update();
+        return Redirect::back()->with('status',  $userBlock->name . ' User status has been updated.');
+    }
 
 
     /**

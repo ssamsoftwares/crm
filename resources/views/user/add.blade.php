@@ -42,6 +42,17 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <x-form.select name="customer_status" label="Status"
+                                chooseFileComment="--Select Status--" :options="[
+                                    'active' => 'Active',
+                                    'block' => 'Block',
+                                ]" />
+                        </div>
+                    </div>
+
+
                     <div>
                         <button class="btn btn-primary mt-2" type="submit">{{__('Add User')}}</button>
                     </div>

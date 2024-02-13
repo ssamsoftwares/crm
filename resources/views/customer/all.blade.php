@@ -188,6 +188,9 @@
 
                                             <option value="busy">
                                                 Busy</option>
+
+                                                <option value="not Required">
+                                                    Not Required</option>
                                         </select>
                                     </td>
 

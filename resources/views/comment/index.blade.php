@@ -97,7 +97,7 @@
                             <x-search.table-search action="{{ route('customer.customerAllComment', $customer->id) }}"
                                 method="get" name="search"
                                 value="{{ isset($_REQUEST['search']) ? $_REQUEST['search'] : '' }}" btnClass="search_btn" />
-                        
+
                     </div>
                 </div>
 
