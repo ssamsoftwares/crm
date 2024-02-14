@@ -189,14 +189,19 @@
                                             <option value="busy">
                                                 Busy</option>
 
-                                                <option value="not Required">
-                                                    Not Required</option>
+                                            <option value="not Required">
+                                                Not Required</option>
                                         </select>
                                     </td>
 
                                     <td>
+                                        {{-- <a href="javascript:void(0)" class="btn btn-success btn-sm"
+                                            onclick="viewCustomerComment(<?= $cust->id ?>)">View Comment</a> --}}
+
+
                                         <a href="javascript:void(0)" class="btn btn-success btn-sm"
-                                            onclick="viewCustomerComment(<?= $cust->id ?>)">View Comment</a>
+                                            onmouseover="viewCustomerComment(<?= $cust->id ?>)">View Comment</a>
+
                                     </td>
 
 
@@ -249,7 +254,7 @@
     </div> <!-- end col -->
     </div> <!-- end row -->
 
-    {{-- Cooment Model Form --}}
+    {{-- Comment Model Form --}}
 
     <div class="modal fade" id="commentViewModel" tabindex="-1" aria-labelledby="commentViewModelLabel"
         aria-hidden="true">
@@ -279,8 +284,14 @@
                 url: '/getCustomerComment/' + customerId,
                 type: 'GET',
                 success: function(response) {
+
+                    var customer = response.customer;
                     var comments = response.comments;
                     var commentList = $('#commentList');
+                    var modalTitle = $('#commentViewModelLabel');
+
+                    modalTitle.text('View Comments - ' + customer.name);
+
                     commentList.empty();
 
                     if (comments.length > 0) {
@@ -315,7 +326,26 @@
                 }
             });
         }
+
+
+        // mouseenter
+        // $('.btn-close').on('mouseenter', function() {
+        //     closeCommentModal();
+        // });
+
+        // function closeCommentModal() {
+        //     // Check if the modal is open
+        //     var isModalOpen = $('body').hasClass('modal-open');
+        //     if (isModalOpen) {
+        //         // Close the modal
+        //         $('#commentViewModel').modal('hide');
+        //         // Remove the data attribute
+        //     }
+        // }
     </script>
+
+
+
 
     {{-- Allot multiple customer to user --}}
     <script>

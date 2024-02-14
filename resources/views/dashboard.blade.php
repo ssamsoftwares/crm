@@ -63,7 +63,7 @@
 
                         <div class="col-lg-2 mt-lg-4">
                             <input type="submit" class="btn btn-primary" value="Filter">
-                            <a href="{{route('dashboard')}}" class="btn btn-secondary">Reset</a>
+                            <a href="{{ route('dashboard') }}" class="btn btn-secondary">Reset</a>
                         </div>
 
                     </div>
@@ -98,7 +98,8 @@
                                 @endphp
                                 @foreach ($total['customerTodayStatus'] as $cust)
                                     <tr>
-                                        <td>{{ ($total['customerTodayStatus']->currentPage() - 1) * $total['customerTodayStatus']->perPage() + $loop->index + 1 }}</td>
+                                        <td>{{ ($total['customerTodayStatus']->currentPage() - 1) * $total['customerTodayStatus']->perPage() + $loop->index + 1 }}
+                                        </td>
 
                                         @if (auth()->user()->hasRole('superadmin'))
                                             <td>{{ isset($cust->user->name) ? $cust->user->name : 'Not Allot User' }}
@@ -123,14 +124,17 @@
                                                 <option value="busy">
                                                     Busy</option>
 
-                                                    <option value="not Required">
-                                                        Not Required</option>
+                                                <option value="not Required">
+                                                    Not Required</option>
                                             </select>
                                         </td>
 
                                         <td>
+                                            {{-- <a href="javascript:void(0)" class="btn btn-success btn-sm"
+                                                onclick="viewCustomerComment(<?= $cust->id ?>)">View Comment</a> --}}
+
                                             <a href="javascript:void(0)" class="btn btn-success btn-sm"
-                                                onclick="viewCustomerComment(<?= $cust->id ?>)">View Comment</a>
+                                                onmouseover="viewCustomerComment(<?= $cust->id ?>)" >View Comment</a>
                                         </td>
 
                                         <td>
@@ -156,21 +160,21 @@
 
                                         <td>
                                             <div class="action-btns text-center" role="group">
-                                            @role('superadmin')
-                                                <a href="{{ route('customer.bulkUploadCustomerEdit', ['customer' => $cust->id]) }}"
-                                                    class="btn btn-info waves-effect waves-light edit btn-sm">
-                                                    <i class="ri-pencil-line"></i>
-                                                </a>
+                                                @role('superadmin')
+                                                    <a href="{{ route('customer.bulkUploadCustomerEdit', ['customer' => $cust->id]) }}"
+                                                        class="btn btn-info waves-effect waves-light edit btn-sm">
+                                                        <i class="ri-pencil-line"></i>
+                                                    </a>
 
-                                                <a href="{{ route('customer.bulkUploadCustomerView', $cust->id) }}"
-                                                    class="btn btn-warning btn-sm">{{ 'Customer Profile' }}</a>
-                                            @endrole
+                                                    <a href="{{ route('customer.bulkUploadCustomerView', $cust->id) }}"
+                                                        class="btn btn-warning btn-sm">{{ 'Customer Profile' }}</a>
+                                                @endrole
 
 
-                                            @role('user')
-                                                <a href="{{ route('customer.bulkUploadCustomerView', $cust->id) }}"
-                                                    class="btn btn-warning btn-sm">{{ 'Customer Profile' }}</a>
-                                            @endrole
+                                                @role('user')
+                                                    <a href="{{ route('customer.bulkUploadCustomerView', $cust->id) }}"
+                                                        class="btn btn-warning btn-sm">{{ 'Customer Profile' }}</a>
+                                                @endrole
 
                                             </div>
                                         </td>
@@ -186,22 +190,22 @@
         </div> <!-- end col -->
     </div>
 
-    {{-- Cooment Model Form --}}
-    <div class="modal fade" id="commentViewModel" tabindex="-1" aria-labelledby="commentViewModelLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5 text-dark" id="commentViewModelLabel">{{ 'View Comments' }}</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <ul id="commentList"></ul>
-                </div>
+
+@endsection
+{{-- Cooment Model Form --}}
+<div class="modal fade" id="commentViewModel" tabindex="-1" aria-labelledby="commentViewModelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5 text-dark" id="commentViewModelLabel">{{ 'View Comments' }}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul id="commentList"></ul>
             </div>
         </div>
     </div>
-@endsection
-
+</div>
 
 @push('script')
     <script>
@@ -311,8 +315,17 @@
                 url: '/getCustomerComment/' + customerId,
                 type: 'GET',
                 success: function(response) {
+
                     var comments = response.comments;
                     var commentList = $('#commentList');
+
+                    var customer = response.customer;
+                    var modalTitle = $('#commentViewModelLabel');
+
+                    modalTitle.text('View Comments - ' + customer.name);
+
+
+
                     commentList.empty();
 
                     if (comments.length > 0) {
@@ -347,5 +360,30 @@
                 }
             });
         }
+
+        // $('.btn-close').on('mouseenter', function() {
+        //     closeCommentModal();
+        // });
+
+        // $('body').on('mousemove', function() {
+        //     closeCommentModal();
+        // });
+
+        // function closeCommentModal() {
+        //     $('#commentViewModel').modal('hide');
+        // }
+
+        // function closeCommentModal() {
+        //     // Check if the modal is open
+        //     var isModalOpen = $('body').hasClass('modal-open');
+        //     if (isModalOpen) {
+        //         // Close the modal
+        //         $('#commentViewModel').modal('hide');
+        //         // Remove the data attribute marking the modal as open
+        //     }
+        // }
+
+
+
     </script>
 @endpush

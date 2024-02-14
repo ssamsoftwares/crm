@@ -106,8 +106,8 @@ class CustomerController extends Controller
                 $query->where('communication_medium', $request->communication_medium);
             }
 
-               //   Date filter
-               if (!empty($request->from_date) && !empty($request->to_date)) {
+            //   Date filter
+            if (!empty($request->from_date) && !empty($request->to_date)) {
                 $from_date = $this->validateAndParseDate($request->from_date);
                 $to_date = $this->validateAndParseDate($request->to_date);
 
@@ -115,7 +115,6 @@ class CustomerController extends Controller
                     $query->whereBetween('created_at', [$from_date->startOfDay(), $to_date->endOfDay()]);
                 }
             }
-
         });
 
         $perPage = $request->input('pagination', 10);
@@ -364,9 +363,16 @@ class CustomerController extends Controller
 
 
     // get  customer Comment
+    // public function getCustomerComment($customerId)
+    // {
+    //     $comments = Comment::where('customer_id', $customerId)->get();
+    //     return response()->json(['comments' => $comments]);
+    // }
+
     public function getCustomerComment($customerId)
     {
-        $comments = Comment::where('customer_id', $customerId)->get();
-        return response()->json(['comments' => $comments]);
+        $customer = Customer::findOrFail($customerId);
+        $comments = $customer->comments;
+        return response()->json(['customer' => $customer, 'comments' => $comments]);
     }
 }
